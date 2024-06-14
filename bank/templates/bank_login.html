@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bank Login</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            position: relative; /* Add this to position the report button relative to the body */
+        }
+        .container {
+            background-color: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .error {
+            color: red;
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .report-button {
+            position: absolute; /* Add this */
+            top: 10px; /* Adjust as needed */
+            right: 10px; /* Adjust as needed */
+            background-color: #dc3545;
+            padding: 8px 16px; /* Adjust padding as needed */
+            width: auto; /* Adjust width as needed */
+        }
+        .report-button:hover {
+            background-color: #c82333;
+        }
+        .footer {
+            font-size: 12px;
+            text-align: center;
+            padding: 10px;
+            width: 100%;
+            background-color: #f2f2f2;
+            position: absolute;
+            bottom: 0;
+            left: 0; /* Ensure the footer stays at the bottom */
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bank Login</h1>
+        {% if error %}
+            <p class="error">{{ error }}</p>
+        {% endif %}
+        <form method="post" action="{% url 'bank_login' %}">
+            {% csrf_token %}
+            <label for="user_id">User ID:</label>
+            <input type="text" id="user_id" name="user_id" required><br>
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required><br>
+            <button type="submit">Login</button>
+        </form>
+    </div>
+    <form method="post" action="{% url 'bank_login' %}" style="position: absolute; top: 10px; right: 10px;">
+        {% csrf_token %}
+        <input type="hidden" name="reported" value="true">
+        <button type="submit" class="report-button">Report This Website</button>
+    </form>
+    <div class="footer">
+        <p>Designed for Moby Phish Project</p>
+    </div>
+</body>
+</html>

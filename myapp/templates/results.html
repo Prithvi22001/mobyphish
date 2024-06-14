@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Results</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .result-list {
+            margin-top: 20px;
+        }
+        .result-card {
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+        }
+        .result-card img {
+            width: 150px;
+            height: auto;
+        }
+        .result-card-body {
+            padding: 15px;
+            flex: 1;
+        }
+        .result-card-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+        }
+        .result-card-text {
+            font-size: 1rem;
+            color: #6c757d;
+        }
+        .result-price {
+            font-size: 1.2rem;
+            color: #28a745;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="my-4">{{ task }}</h1>
+        <div class="result-list">
+            {% if task_type == 'hotel' %}
+                {% for result in search_results %}
+                <form method="POST" action="{% url 'travel_page' task_id %}">
+                    {% csrf_token %}
+                    <div class="card result-card">
+                        <div class="card-body result-card-body">
+                            <h5 class="card-title result-card-title">Hotel in {{ result.from_city }}</h5>
+                            <p class="card-text result-card-text">From {{ result.from_date |date }} to {{ result.to_date |date }}</p>
+                            <p class="result-price">${{ result.price }} per night</p>
+                            <p class="result-rating">Rating : {{ result.rating }} / 5</p>
+                            {% if result.no_of_rooms %}
+                            <p class="result-rooms">{{ result.no_of_rooms }} rooms available</p>
+                            {% endif %}
+                            <input type="hidden" name="from_city" value="{{ result.from_city }}">
+                            <input type="hidden" name="from_date" value="{{ result.from_date }}">
+                            <input type="hidden" name="to_date" value="{{ result.to_date }}">
+                            <input type="hidden" name="price" value="{{ result.price }}">
+                            <input type="hidden" name="rating" value="{{ result.rating }}">
+                            <input type="hidden" name="correct_result" value="{{ result.correct_results }}">
+                            <input type="hidden" name="task_type" value="{{ task_type}}">
+                            <input type="hidden" name="message" value="{{ result.message }}">
+
+                            
+                            {% if result.no_of_rooms %}
+                            <input type="hidden" name="no_of_rooms" value="{{ result.no_of_rooms }}">
+                            {% endif %}
+                            <button type="submit" class="btn btn-primary complete-button">Book</button>
+                        </div>
+                    </div>
+                </form>
+                {% endfor %}
+            {% elif task_type == 'airline' %}
+                {% for result in search_results %}
+                <form method="POST" action="{% url 'travel_page' task_id %}">
+                    {% csrf_token %}
+                    <div class="card result-card">
+                        <div class="card-body result-card-body">
+                            <h5 class="card-title result-card-title">Flight from {{ result.from_city }} to {{ result.to_city }}</h5>
+                            <p class="card-text result-card-text">From {{ result.from_date |date }} to {{ result.to_date |date }}</p>
+                            <p class="card-text result-card-text">From {{ result.airline}}</p>
+                            <p class="result-price">${{ result.price }}</p>
+                            <p class="result-layovers">{{ result.layovers }} layovers</p>
+                            <input type="hidden" name="from_city" value="{{ result.from_city }}">
+                            <input type="hidden" name="to_city" value="{{ result.to_city }}">
+                            <input type="hidden" name="from_date" value="{{ result.from_date }}">
+                            <input type="hidden" name="to_date" value="{{ result.to_date }}">
+                            <input type="hidden" name="airline" value="{{ result.airline }}">
+                            <input type="hidden" name="price" value="{{ result.price }}">
+                            <input type="hidden" name="message" value="{{ result.message }}">
+                            <input type="hidden" name="layovers" value="{{ result.layovers }}">
+                            <input type="hidden" name="correct_result" value="{{ result.correct_results }}">
+                            <input type="hidden" name="task_type" value="{{ task_type}}">
+
+
+                            <button type="submit" class="btn btn-primary complete-button">Book</button>
+                        </div>
+                    </div>
+                </form>
+                {% endfor %}
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

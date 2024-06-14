@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Random Item</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .item {
+            background: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .item h3 {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <h2>Random Item</h2>
+    {% if item %}
+        <div class="item">
+            <h3>hahah {{ name }}</h3>
+        </div>
+    {% else %}
+        <p>No items available.</p>
+    {% endif %}
+    <form method="post" action="{% url 'complete_item' %}">
+        {% csrf_token %}
+        <button type="submit">Complete</button>
+    </form>
+</body>
+</html>
