@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
+    {% include 'favicon.html' %}
+
     <title>{{ title }}</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -9,12 +11,23 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
         body, h1, h2, h3, h4, h5, h6 {
-            font-family: "Raleway", Arial, Helvetica, sans-serif
+            font-family: "Raleway", Arial, Helvetica, sans-serif;
         }
-        .room-image {
+        .room-image, .hotel-image, .bedroom-image, .bathroom-image {
             width: 100%;
             height: 300px;
             object-fit: cover;
+        }
+        .footer {
+            font-size: 12px;
+            text-align: center;
+            padding: 10px;
+            width: 100%;
+            background-color: #f2f2f2;
+            box-sizing: border-box; /* Ensure padding and border are included in element's total width */
+            position: fixed;
+            bottom: 0;
+            left: 0;
         }
     </style>
 </head>
@@ -24,17 +37,23 @@
     <a href="#" class="w3-bar-item w3-button w3-red w3-mobile">
         <i class="fa fa-bed w3-margin-right"></i>{{ title }}
     </a>
-    <a href="#rooms" class="w3-bar-item w3-button w3-mobile">Rooms</a>
+    <a href="#rooms" class="w3-bar-item w3-button w3-mobile">{{ hotel }}</a>
 </div>
 
-<header class="w3-container w3-center">
-    <h1>{{ title }}</h1>
-    <p>{{ blurb }}</p>
-</header>
+<div style="padding: 1%; margin: 1%;" id="rooms">
+    <div class="w3-row-padding">
+        <div class="w3-col l4 m4"> 
+            <img class="hotel-image" src="{{ hotel_image }}/{{ hotel }}.png" alt="Hotel Image">
+        </div>
+        <div class="w3-col l4 m4">
+            <img class="bedroom-image" src="{{ hotel_image }}/bedroom.png" alt="Bedroom Image">
+        </div>
+        <div class="w3-col l4 m4">
+            <img class="bathroom-image" src="{{ hotel_image }}/bathroom.png" alt="Bathroom Image">
+        </div>
+    </div>
+    <p>{{ hotel_snippet_short }}</p>
 
-<div class="w3-container w3-padding-32" id="rooms">
-    <img class="room-image" src="{{ image }}" alt="Room Image">
-    <p>{{ blurb1 }}</p>
     <div class="w3-row-padding">
         <div class="w3-col l6 m6">
             <h4>Amenities</h4>
@@ -49,33 +68,46 @@
         <div class="w3-col l6 m6">
             <h4>The price of the room is ${{ price }}</h4>
             <p class="w3-large">Rating: {{ ratings }} stars</p>
+            <form action="{% url 'booking' %}" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="item_id" value="{{ item_id }}">
+                <input type="hidden" name="from_city" value="{{ from_city }}">
+                <input type="hidden" name="from_date" value="{{ from_date }}">
+                <input type="hidden" name="to_date" value="{{ to_date }}">
+                <input type="hidden" name="price" value="{{ price }}">
+                <input type="hidden" name="no_of_rooms" value="{{ no_of_rooms }}">
+                <input type="hidden" name="ratings" value="{{ ratings }}">
+                <input type="hidden" name="hotel" value="{{ hotel }}">
+                <input type="hidden" name="correct_result" value="{{ correct_result }}">
+                <input type="hidden" name="message" value="{{ message }}">
+                <input type="hidden" name="task_type" value="{{ task_type }}">
+                <button class="w3-button w3-block w3-green w3-margin-top" type="submit">Purchase Now</button>
+            </form>
         </div>
     </div>
 </div>
 
-<div class="w3-container w3-padding-32" id="about">
-    <h2>About {{ title }}</h2>
-    <p>{{ blurb }}</p>
+<div  id="about">
+    <p>{{ hotel_snippet }}</p>
 </div>
 
-<div class="w3-container w3-padding-32" id="book">
-    <h2>Purchase Now</h2>
-    <form action="{% url 'booking' %}" method="post">
-        {% csrf_token %}
-        <input type="hidden" name="item_id" value="{{ item_id }}">
-        <input type="hidden" name="from_city" value="{{ from_city }}">
-        <input type="hidden" name="from_date" value="{{ from_date }}">
-        <input type="hidden" name="to_date" value="{{ to_date }}">
-        <input type="hidden" name="price" value="{{ price }}">
-        <input type="hidden" name="no_of_rooms" value="{{ no_of_rooms }}">
-        <input type="hidden" name="ratings" value="{{ ratings }}">
-        <input type="hidden" name="correct_result" value="{{ correct_result }}">
-        <input type="hidden" name="message" value="{{ message }}">
-        <input type="hidden" name="task_type" value="{{ task_type }}">
-        <button class="w3-button w3-block w3-green w3-margin-top" type="submit">Purchase Now</button>
-        <!-- <button class="w3-button w3-block w3-red w3-margin-top" type="button">Report Website</button> -->
+{% include 'report.html' %}
+
+  <div id="report-frame" class="report-frame">
+    <p>You are reporting this page. This page is part of the MobyPhish experiment and is not a real site.
+      For more information, please visit the <a href="https://mobyphish.com">MobyPhish main page</a>.
+    </p>
+    <form method="post" action="{% url 'report' %}">
+      {% csrf_token %}
+      <input type="hidden" name="reported" value="true">
+      <button type="submit" class="report-button">Report This Website</button>
     </form>
-</div>
+  </div>
 
+
+
+<div class="footer">
+    <p>Designed for MobyPhish Project</p>
+</div>
 </body>
 </html>

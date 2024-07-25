@@ -1,39 +1,145 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import User, Item
-from bank.models import BankUser
+from .models import User, Item, ItemDump
+from bank.models import BankUser,Transaction
 from .forms import UserIdForm
 import time
 import urllib.parse
 from . import task_generate
 from django.conf import settings
 import json
+from django.http import JsonResponse
 import ast
 import pickle
 import datetime
 import random
+import string
 from datetime import datetime
+from django.views.decorators.csrf import csrf_exempt
+import logging
+from django.urls import reverse
+
+
+logger = logging.getLogger('myapp')
+
+def index(request):
+    fish2=settings.MEDIA_URL+'fish2.png'
+    fish=settings.MEDIA_URL+'fish.jpeg'
+    mail=settings.MEDIA_URL+'mail1.png'
+
+    return render(request,'mobyphish.html', {'mail':mail,'fish': fish,'fish2':fish2 } )
+
+def get_started(request):
+    fish2=settings.MEDIA_URL+'fish2.png'
+    fish=settings.MEDIA_URL+'fish.jpeg'
+
+    return render(request,'mobyphish-get-started.html', {'fish': fish,'fish2':fish2 } )
+
+def study(request):
+    fish2=settings.MEDIA_URL+'fish2.png'
+    fish=settings.MEDIA_URL+'fish.jpeg'
+
+    return render(request,'mobyphishstudy.html', {'fish': fish,'fish2':fish2 } )
+
 
 def home(request):
     if request.method == 'POST':
         form = UserIdForm(request.POST)
         if form.is_valid():
             user_id = form.cleaned_data['user_id']
-            if User.objects.filter(user_id=user_id).exists():
-                response = redirect('tasks')
-                response.set_cookie('user_id', user_id)
-                return response
+            password = form.cleaned_data['password']
+
+            if User.objects.filter(user_id=user_id).exists() :
+                user=User.objects.get(user_id=user_id)
+                if user.check_password(password):
+                    response = redirect('tasks')
+                    response.set_cookie('user_id', user_id)
+                    response.set_cookie('use_extension', user.use_extension)
+
+                    logger.info(f"USER: {user_id} logged in and use_extension is set as {user.use_extension}")
+                    return response
             else:
-                form.add_error('user_id', 'Invalid user ID')
+                logger.info(f"USER: {user_id} ,PASSWORD: {password} incorrect user ID or password ")
+                form.add_error('user_id', 'Invalid user ID or password')
     else:
         form = UserIdForm()
     return render(request, 'home.html', {'form': form})
 
 def logout_view(request):
-    response = redirect('home')  # Redirect to home page or any other page
+    response = redirect('home')
+    request.session.flush()
     for cookie in request.COOKIES:
         response.delete_cookie(cookie)
     return response
+
+def generate_random_code(length=4):
+
+    animals = ["Cat", "Dog", "Fox", "Bat", "Rat", "Cow", "Ant", "Bee", "Owl", "Hen", "Pig", "Ram", "Cub", "Yak", "Ape", "Bug", "Cod", "Elk", "Fly"]
+    colors = ["Red", "Blu", "Grn", "Yel", "Org", "Pur", "Pnk", "Blk", "Wht", "Cyn", "Mag", "Lime", "Aqua", "Teal", "Gray", "Navy", "Gold", "Tan", "Mint", "Lav"]
+    animal = random.choice(animals)
+    color = random.choice(colors)
+    number = random.randint(1, 99)
+    username=[animal,color,str(number)]
+    random.shuffle(username)
+    return ''.join(username)
+    # characters = string.ascii_letters + string.digits
+    # return ''.join(random.choice(characters) for _ in range(length))
+
+last_use_extension = False
+
+@csrf_exempt
+def survey(request):
+    global last_use_extension 
+    if request.method== 'POST' :
+        data= json.loads(request.body)
+        logger.info(f"Got request from qualtrics creating userID and password")
+        userID=""
+        while True:
+            userID=generate_random_code()
+            if not User.objects.filter(user_id=userID).exists():
+                break
+        characters = string.ascii_lowercase + string.digits
+        bank_password=''.join(random.choice(characters) for _ in range(4))
+        
+        # Alternate use_extension value
+        use_extension = not last_use_extension
+        last_use_extension = use_extension
+        
+
+        new_user=User(user_id=userID,password=bank_password,use_extension=use_extension,round_no=1)
+        new_user.save()
+        bank_user = BankUser(user_id=userID,password=bank_password)
+        bank_user.save()
+        logger.info(f"Created {userID} with PASSWORD: {bank_password} and use_extension: {use_extension}")
+        return JsonResponse({'randomID':userID,'password':bank_password})
+
+
+
+@csrf_exempt
+def test_credentials(request):
+    global last_use_extension 
+    if request.method== 'GET' :
+        # data= json.loads(request.body)
+        logger.info(f"Got request from test_credentials creating userID and password")
+        userID=""
+        while True:
+            userID=generate_random_code()
+            if not User.objects.filter(user_id=userID).exists():
+                break
+        characters = string.ascii_lowercase + string.digits
+        bank_password=''.join(random.choice(characters) for _ in range(4))
+        
+        # Alternate use_extension value
+        use_extension = not last_use_extension
+        last_use_extension = use_extension
+        
+
+        new_user=User(user_id=userID,password=bank_password,use_extension=use_extension,round_no=1)
+        new_user.save()
+        bank_user = BankUser(user_id=userID,password=bank_password)
+        bank_user.save()
+        logger.info(f"Created {userID} with PASSWORD: {bank_password} and use_extension: {use_extension}")
+        return JsonResponse({'randomID':userID,'password':bank_password})
 
 
 def items_view(request):
@@ -43,35 +149,85 @@ def items_view(request):
     user_id = request.COOKIES['user_id']
     user = get_object_or_404(User, user_id=user_id)
 
-    # Check for bank password
-    try:
-        bank_user = BankUser.objects.get(user_id=user)
-        bank_password = bank_user.password
-    except BankUser.DoesNotExist:
-        bank_password="Could not find bank details!!"
-        # return render(request, 'error.html', {'message': 'Bank details not found for user.'})
-
-
+    new_generated_tasks=False
     default_tasks_count = Item.objects.filter(user=user, status='default').count()
     complete_tasks_count = Item.objects.filter(user=user, status='completed').count()
     active_tasks_count = Item.objects.filter(user=user, status='active').count()
+    reported_tasks_count = Item.objects.filter(user=user, status='reported').count()
     incorrect_tasks_count = Item.objects.filter(user=user, status='incorrect').count()
     
     total_correct_tasks=complete_tasks_count+active_tasks_count+incorrect_tasks_count
+    logger.info(f"{user_id} Entering items_view function")
+
+
+
     # Generate tasks only if the number of default tasks is less than 4
-    if default_tasks_count+complete_tasks_count+active_tasks_count< 5:
+    if default_tasks_count+complete_tasks_count+active_tasks_count< settings.NO_OF_TASKS:
 
         for i in range(settings.NO_OF_TASKS):
             default_tasks_count = Item.objects.filter(user=user, status='default').count()
-            if default_tasks_count+complete_tasks_count +active_tasks_count< 5:
+            if default_tasks_count+complete_tasks_count +active_tasks_count+reported_tasks_count< settings.NO_OF_TASKS:
                 ans=task_generate.generate_task()
                 task=Item(user=user,task=ans['task'],results=pickle.dumps(ans['results']),all_info=pickle.dumps(ans),status='default')
                 task.save()
-            
+                new_generated_tasks=True
+                
+    if default_tasks_count+active_tasks_count==0:
+        if user.round_no == 1:
+            user.round_no = 2
+            user.use_extension= not user.use_extension
+            user.save()
+            logger.info(f"USER: {user_id} completed round 1")
+            items = Item.objects.filter(user=user)
+            for item in items:
+                ItemDump.objects.create(
+                    user=item.user,
+                    task=item.task,
+                    results=item.results,
+                    all_info=item.all_info,
+                    message=item.message,
+                    time_start=item.time_start,
+                    time_end=item.time_end,
+                    bank_vist=item.bank_vist,
+                    status=item.status,
+                    phish=item.phish,
+                    result=item.result
+                )
+            items.delete()
+            message = 'Round completed. Proceed to the next round.'
+            request.session.flush()
+
+            url = reverse('home') + f'?message={message}'
+            response = redirect(url)
+            for cookie in request.COOKIES:
+                response.delete_cookie(cookie)
+            return response
+
+        elif default_tasks_count+active_tasks_count==0 and user.round_no == 2:
+            logger.info(f"USER: {user_id} both round completed")
+            return render(request, 'items.html', {'items': '','completed':"YES"})
+
+
     items = Item.objects.filter(user=user)
     active_item = items.filter(status='active').first()
 
-    return render(request, 'items.html', {'items': items, 'active': active_item.id if active_item else None,'bank_password':bank_password,'user_id':user_id})
+    if new_generated_tasks:
+        default_items = items.filter(status='default')
+        item_count = default_items.count()
+        phish_count = item_count // 2  # 20% of items
+        phish_items = random.sample(list(default_items), phish_count)
+        
+        for item in phish_items:
+            if not item.phish:
+                item.phish = True
+                item.save()
+        
+    # Order items by status
+    status_order = ['active', 'default', 'completed', 'reported', 'incorrect']
+    ordered_items = sorted(items, key=lambda x: status_order.index(x.status))
+
+
+    return render(request, 'items.html', {'items': ordered_items, 'active': active_item.id if active_item else None})
 
 def proceed_item(request, item_id):
     if 'user_id' not in request.COOKIES:
@@ -86,67 +242,67 @@ def proceed_item(request, item_id):
 
     if active_item:
         if active_item.id==item.id:
-            print(f"ITEM ID: {item_id} acitve clicked",flush=True)
+            logger.info(f"USER : {user_id}, ITEM ID: {item_id} active item clicked again")
+            request.session['phish'] = item.phish
+            request.session['item_id'] = item_id 
+            # request.session.modified = True
+            request.session.save()  # Explicitly save the session
+
+            logger.info(f"USER: {user_id} ,ITEM ID: {item_id} started at {item.time_start} this item is phished {item.phish}")
+            logger.info(f"USER: {user_id} ,ITEM ID: {item_id} started at {item.time_start} this sission{request.session.items()}")
+
             return redirect('results',item_id=item_id)
         else:
-            print(f"ITEM ID: {item_id} not active clicjed",flush=True)
-            messages.error(request, "Cannot start this task until the active task is completed.")
+            logger.info(f"USER: {user_id},ITEM ID: {item_id} not active clicked")
+            messages.error(request, "Cannot start this task until the active highlighted task is completed.")
             return redirect('tasks')  # Redirect back to items page
 
     else:
         if item.status=='active':
-            print(f"ITEM ID: {item_id} idk why",flush=True)
+            logger.info(f"USER: {user_id}, ITEM ID: {item_id} active item clicked ")
+            request.session['phish'] = item.phish
+            request.session['item_id'] = item_id 
+            # request.session.modified = True
+            request.session.save()  # Explicitly save the session
+
+            logger.info(f"USER: {user_id} ,ITEM ID: {item_id} started at {item.time_start} this item is phished {item.phish}")
+            logger.info(f"USER: {user_id} ,ITEM ID: {item_id} started at {item.time_start} this sission{request.session.items()}")
 
             return redirect('results',item_id=item_id)
 
         else:
-            print(f"ITEM ID: {item_id} new active",flush=True)
-
             item.time_start = int(time.time())
             item.status = 'active'
             item.all_info=item.all_info
-            # print(item.all_info,flush=True)
-            # print(type(item.all_info),flush=True)
             item.save()
-            print(f"Task : {item.id} started at {item.time_start}",flush=True)
+            request.session['phish'] = item.phish
+            request.session['item_id'] = item_id 
+            # request.session.modified = True
+            request.session.save()  # Explicitly save the session
+
+            logger.info(f"USER: {user_id} ,ITEM ID: {item_id} started at {item.time_start} this item is phished {item.phish}")
+            logger.info(f"USER: {user_id} ,ITEM ID: {item_id} started at {item.time_start} this sission{request.session.items()}")
+
             return redirect('results', item_id=item.id)
-
-        # # Redirect to external URL with user_id and task as query parameters
-        # base_url = "http://127.0.0.1:8001/results/"
-        # params = urllib.parse.urlencode({'user_id': user_id, 'task': item.task,'location':item.location,'travel_industry':item.travel_industry,'item_id':item.id})
-        # url = f"{base_url}?{params}"
-        # print("REDIRECting",flush=True)        
-        # return redirect(url)
-
-        # return render(request, 'redirect_external.html', {'url': url})
-
-        # return redirect('127.0.0.1:8000')
-
-    # return render(request, 'items.html', {'items': items, 'active': active_item.id if active_item else None})
-
 
 
 def results(request, item_id):
 
     item = get_object_or_404(Item, id=item_id)
     all_info=pickle.loads(item.all_info)
-    # print("all_info:", repr(all_info), flush=True)
-    # print("type of all_info:", type(all_info), flush=True)
 
     search_results=all_info['results']
     random.shuffle(search_results)
+
     task=all_info['task']
     task_type = all_info['type']  # Get the type of task
-    print(f"search_Results : {search_results}",flush=True)
-    
-
 
     return render(request, 'results.html', {'task': task, 'task_id': item_id,'search_results':search_results, 'task_type': task_type})
 
 def travel_page(request, item_id):
     if request.method == 'POST':
+        user_id = request.COOKIES['user_id']
         task_type = request.POST.get('task_type')
-        print(f"in travel view {task_type}", flush=True)
 
         if task_type == 'hotel':
             from_city = request.POST.get('from_city')
@@ -156,8 +312,28 @@ def travel_page(request, item_id):
             ratings=request.POST.get('rating')
             no_of_rooms = request.POST.get('no_of_rooms')
             correct_result = request.POST.get('correct_result') 
+            hotel_snippet_short = request.POST.get('hotel_snippet_short') 
+            hotel_snippet = request.POST.get('hotel_snippet') 
             message = request.POST.get('message')
             task_type = request.POST.get('task_type')
+            hotel=request.POST.get('hotel')
+            hotel_image=request.POST.get('hotel_image')
+
+            logger.info(f"USER: {user_id} selected RESULT:{correct_result} for {task_type} task")
+
+
+            request.session['from_city'] = request.POST.get('from_city')
+            request.session['from_date'] = request.POST.get('from_date')
+            request.session['to_date'] = request.POST.get('to_date')
+            request.session['price'] = request.POST.get('price')
+            request.session['ratings'] = request.POST.get('ratings')
+            request.session['no_of_rooms'] = request.POST.get('no_of_rooms')
+            request.session['correct_result'] = request.POST.get('correct_result')
+            request.session['message'] = request.POST.get('message')
+            request.session['task_type'] = request.POST.get('task_type')
+            request.session['hotel'] = request.POST.get('hotel')
+            request.session['hotel_image'] = request.POST.get('hotel_image')
+            request.session['item_id'] = item_id
 
             context = {
                 'from_city': from_city,
@@ -169,9 +345,12 @@ def travel_page(request, item_id):
                 'correct_result':correct_result,
                 'task_type':task_type,
                 'message': message,
+                'hotel_snippet_short':hotel_snippet_short,
+                'hotel_snippet':hotel_snippet,
+                'hotel':hotel,
                 'blurb': "Experience the best stay at our luxurious hotel.",
                 'blurb1': "Comfortable and well-furnished rooms available.",
-                'image': 'path_to_image.jpg',  # Add path to hotel logo image
+                'hotel_image': hotel_image, 
                 'item_id':item_id,
             }
             return render(request, 'hotel_result.html', context)
@@ -187,9 +366,23 @@ def travel_page(request, item_id):
             layovers = request.POST.get('layovers')
             correct_result = request.POST.get('correct_result') 
             task_type = request.POST.get('task_type')
+            airline_logo= request.POST.get('airline_logo') #settings.MEDIA_URL+airline+'.png'
 
-            print(from_date,task_type,correct_result,flush=True)
-            print(type(from_date),to_date,correct_result,flush=True)
+            logger.info(f"USER: {user_id} selected RESULT:{correct_result} for {task_type} task")
+
+            request.session['from_city'] = request.POST.get('from_city')
+            request.session['to_city'] = request.POST.get('to_city')
+            request.session['from_date'] = request.POST.get('from_date')
+            request.session['to_date'] = request.POST.get('to_date')
+            request.session['airline'] = request.POST.get('airline')
+            request.session['price'] = request.POST.get('price')
+            request.session['message'] = request.POST.get('message')
+            request.session['layovers'] = request.POST.get('layovers')
+            request.session['correct_result'] = request.POST.get('correct_result')
+            request.session['task_type'] = request.POST.get('task_type')
+            request.session['airline_logo'] = request.POST.get('airline_logo')
+            request.session['item_id'] = item_id
+
 
             context = {
                 'from_city': from_city,
@@ -203,14 +396,16 @@ def travel_page(request, item_id):
                 'correct_result':correct_result,
                 'task_type':task_type,
                 'item_id':item_id,
-                'airline_logo': 'path_to_airline_logo.jpg'  # Add path to airline logo image
+                'airline_logo': airline_logo  # Add path to airline logo image
             }
             return render(request, 'airline_result.html', context)
-    return redirect('some_default_view')  # Redirect to a default view if the request method is not POST
+    return redirect('tasks')
 
 def booking(request):
     if request.method == 'POST':
         task_type = request.POST.get('task_type')
+        user_id = request.COOKIES['user_id']
+        item_id=request.session.get('item_id')
 
         if task_type == 'airline':
 
@@ -225,18 +420,7 @@ def booking(request):
             correct_result = request.POST.get('correct_result')
             task_type = request.POST.get('task_type')
             item_id = request.POST.get('item_id')
-            
-            request.session['from_city'] = request.POST.get('from_city')
-            request.session['to_city'] = request.POST.get('to_city')
-            request.session['from_date'] = request.POST.get('from_date')
-            request.session['to_date'] = request.POST.get('to_date')
-            request.session['airline'] = request.POST.get('airline')
-            request.session['layovers'] = request.POST.get('layovers')
-            request.session['price'] = request.POST.get('price')
-            request.session['message'] = request.POST.get('message')
-            request.session['correct_result'] = request.POST.get('correct_result')
-            request.session['task_type'] = request.POST.get('task_type')
-            request.session['item_id'] = request.POST.get('item_id')
+
         
         elif task_type=='hotel':
             from_city = request.POST.get('from_city')
@@ -250,46 +434,96 @@ def booking(request):
             task_type = request.POST.get('task_type')
             item_id = request.POST.get('item_id')
             
-            request.session['from_city'] = request.POST.get('from_city')
-            request.session['from_date'] = request.POST.get('from_date')
-            request.session['to_date'] = request.POST.get('to_date')
-            request.session['price'] = request.POST.get('price')
-            request.session['no_of_rooms'] = request.POST.get('no_of_rooms')
-            request.session['message'] = request.POST.get('message')
-            request.session['ratings'] = request.POST.get('ratings')
-            request.session['correct_result'] = request.POST.get('correct_result')
-            request.session['task_type'] = request.POST.get('task_type')
-            request.session['item_id'] = request.POST.get('item_id')
-    
-        print(f"TASKTYPe : {task_type},correct_result:{correct_result}",flush=True)
-        
+        phish = request.session.get('phish', None)  # Default to None to see if it is missing
+        logger.info(f"USER: {user_id}, ITEM: {item_id}, making URL because phish={phish}")
 
-        return redirect('http://127.0.0.1:8000/bank_login/')
+        # Check if phish is None and log it
+        if phish is None:
+            logger.error(f"USER: {user_id}, ITEM: {item_id}, phish is None. Session: {request.session.items()}")
+
+        item = get_object_or_404(Item, id=item_id)
+        item.bank_vist = int(time.time())
+        item.save()
+
+        ###TODO PHISHING ATTACKS
+        good_url='acct.IlogicalLoansSavings'            
+        letters = string.ascii_lowercase
+        pre=''.join(random.choice(letters) for i in range(3))
+
+        if phish:
+            bad_urls=['acct-IlogicalLoansSavings','acct.Ilogical.LoansSavings','acct.IIogicalLoansSavings','acct.llogicalLoansSavings','acct.IlogicalLoanSavings','acct.IlogicaILoansSavings','acct.lIogicalLoansSavings']
+            bad_prefix=['wcwm','wzho']
+            url=''
+            if random.random()<0.5:
+                logger.info(f"USER: {user_id}, ITEM: {item_id} cert attack")
+                url='https://'+random.choice(bad_prefix)+'.'+good_url+'.mobyphish.com/bank_login'
+            else:
+                logger.info(f"USER: {user_id}, ITEM: {item_id} url attack")
+                url='https://'+'w'+pre+'.'+random.choice(bad_urls)+'.mobyphish.com/bank_login'
+        else:
+            url='https://'+'w'+pre+'.'+good_url+'.mobyphish.com/bank_login'
+        logger.info(f"USER: {user_id}, ITEM: {item_id} redirecting to {url}")
+
+
+
+
+        # return redirect('bank_login')
+        return redirect(url)
 
 
     return redirect('tasks')  # Redirect to a default view if the request method is not POST
 
 def complete_item(request, item_id):
+    user_id = request.COOKIES['user_id']
     item = get_object_or_404(Item, id=item_id)
     item.time_end = int(time.time())
-
-
-    print(f"reporeted : {request.session.get('reported')} ,task correcet : {repr(request.session.get('correct_result'))} ; {request.session.get('correct_result')} type : {type({request.session.get('correct_result')})}",flush=True)
+    # trans=Transaction.objects.get(user_id=request.COOKIES['user_id'],task_id=item_id)
     
     if request.session.get('reported'):
-        print(f"SOOOOOOOO REPORTED",flush=True)
+        if request.session.get('phish'):
+            logger.info(f"USER: {user_id} ITEM: {item_id} was reported and is phished {request.session.get('phish')}")
+            item.result='sucess'
+        else:
+            logger.info(f"USER: {user_id} ITEM: {item_id} was reported and is phished {request.session.get('phish')}")
+            item.result='fail'
+
         item.status = 'reported'
+
     else:
         if request.session.get('correct_result') == 'True':
+            if request.session.get('phish'):
+                logger.info(f"USER: {user_id} ITEM: {item_id} was not reported and is phished {request.session.get('phish')}")
+                item.result='fail'
+            else:
+                logger.info(f"USER: {user_id} ITEM: {item_id} was not reported and is phished {request.session.get('phish')}")
+                item.result='sucess'
             item.status = 'completed'
         else:
             item.status = 'incorrect'
+            logger.info(f"USER: {user_id} ITEM: {item_id} was not reported,incorrect and is phished {request.session.get('phish')}")
+            item.result='fail'
             item.message=request.session.get('message')
             messages.error(request, item.message)
+    
 
 
     item.save()
-    print(f"Task : {item.id} completed at {item.time_end}",flush=True)
+    logger.info(f"USER: {user_id} ITEM: {item_id} completed at {item.time_end}")
+    request.session.flush()
+    logger.info(f"USER: {user_id} flush session {request.session.keys()}")
 
+    return redirect('tasks')
+
+
+def report(request):
+    try:
+        user_id = request.COOKIES['user_id']
+        item_id=request.session.get('item_id')
+        item = get_object_or_404(Item, id=item_id)
+        item.status = 'default'
+        item.save()
+        logger.warning(f'USER: {user_id} reported task {item_id} on non bank page resetting to default')
+    except Exception as e:
+        logger.error(f"IN REPORT {str(e)}")
 
     return redirect('tasks')

@@ -1,0 +1,50 @@
+/* The settings of the  vertical navbar */
+  .vertNav a {
+    display: block;
+    text-align: center;
+    background-color: #87bdd8;
+    padding: 1rem 0rem 1rem 0rem;
+    border-radius: 1rem;
+    margin-top: 1rem;
+    color: black;
+    text-decoration: none;
+  }
+  
+  .vertNav a:hover {
+    background-color: #d8eaf2;
+    color: white;
+  }
+  
+  .vertNav .active {
+    background-color: #1B263B;
+    color: white;
+    border-radius: 1rem;
+  }
+  
+  .locked {
+    background-color: #525252;
+    color: #818589;
+    text-decoration: none;
+    cursor: not-allowed;
+  }
+  
+  .locked.enabled {
+    background-color: #87bdd8;
+    color: black;
+    cursor: pointer;
+  }
+  
+  .vertNav h2 {
+    display: none;
+  }
+  
+  /**
+    .locked:hover + h2{
+      display: block;
+      color: red;
+      font-size: 15px;
+      padding-left: 1rem;
+    }
+  */
+  
+  /*End of the desgin of vertical navbar*/

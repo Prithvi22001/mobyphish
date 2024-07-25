@@ -1,7 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dataguard Messenger</title>
+    {% include 'favicon.html' %}
+    <title>CyberShield Solutions</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,16 +12,18 @@
             display: flex;
             flex-direction: column;
             min-height: 100vh;
-            position: relative; /* Enable absolute positioning for the footer */
+            position: relative;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
         }
         .navbar {
             width: 100%;
             background-color: #333;
-            overflow: hidden;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 10px 20px;
+            box-sizing: border-box;
+            flex-wrap: wrap; /* Allow wrapping to prevent overflow */
         }
         .navbar h1 {
             color: white;
@@ -45,30 +48,25 @@
             font-size: 14px;
             background-color: #fff;
             border-bottom: 1px solid #ddd;
+            box-sizing: border-box; /* Ensure padding and border are included in element's total width */
+            width: 100%; /* Ensure it spans the full width */
         }
         .container {
             background-color: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 600px;
+            max-width: 750px;
             width: 100%;
             margin: 20px auto;
             text-align: center;
-            display: flex; /* Add flex display */
-            flex-direction: row; /* Arrange items horizontally */
-        }
-        .sidebar {
-            flex: 1; /* Allow the sidebar to take up remaining space */
-            padding-right: 20px; /* Add some space between the sidebar and tasks */
-            text-align: left; /* Align text to the left */
-        }
-        .sidebar p {
-            margin-top: 0; /* Remove top margin from paragraphs */
-            margin-bottom: 20px; /* Add bottom margin to paragraphs */
+            display: flex;
+            flex-direction: row;
+            box-sizing: border-box; /* Ensure padding and border are included in element's total width */
+            flex: 1; /* Allow the container to grow and fill the available space */
         }
         .tasks {
-            flex: 3; /* Allow the tasks list to take up most of the space */
+            flex: 1;
             text-align: center;
         }
         h2 {
@@ -90,9 +88,9 @@
             align-items: center;
             justify-content: space-between;
         }
-        .item h3 {
+        .item h4 {
             margin: 0;
-            padding: 0;
+            padding-right: 10px;
             color: #333;
             flex: 1;
             text-align: left;
@@ -105,6 +103,7 @@
             color: white;
             font-size: 14px;
             cursor: pointer;
+            align-self: center; /* Center the button vertically */
         }
         button:hover {
             background-color: #45a049;
@@ -115,9 +114,10 @@
             padding: 10px;
             width: 100%;
             background-color: #f2f2f2;
-            position: absolute;
+            box-sizing: border-box; /* Ensure padding and border are included in element's total width */
+            position: fixed;
             bottom: 0;
-            left: 0; /* Ensure the footer stays at the bottom */
+            left: 0;
         }
         .link {
             margin-top: 20px;
@@ -161,10 +161,10 @@
         window.onload = function() {
             var activeTaskButton = document.querySelector('.active form button');
             if (activeTaskButton && !activeTaskButton.dataset.clicked) {
-                activeTaskButton.dataset.clicked = true; // Set a flag to indicate that the button has been clicked
+                activeTaskButton.dataset.clicked = true;
                 if (activeTaskButton.form) {
-                    activeTaskButton.click(); // Simulate click to proceed with the active task
-                    window.open(activeTaskButton.form.action, '_blank'); // Open in new tab
+                    activeTaskButton.click();
+                    window.open(activeTaskButton.form.action, '_blank');
                 }
             }
         }
@@ -172,16 +172,13 @@
 </head>
 <body>
     <div class="navbar">
-        <h1>Dataguard Messenger</h1>
+        <h1>CyberShield Solutions</h1>
         <form action="{% url 'logout' %}" method="post" style="margin: 0;">
             {% csrf_token %}
             <button type="submit" class="logout-button">Logout</button>
         </form>
     </div>
-    <div class="user-info">
-        <p>User ID: {{ user_id }}</p>
-        <p>Bank Password: {{ bank_password }}</p>
-    </div>
+
     <div class="container">
         <div class="tasks">
             <h2>Tasks</h2>
@@ -190,6 +187,10 @@
                 <div class="message {{ message.tags }}">{{ message }}</div>
                 {% endfor %}
             </div>
+            {% if completed == 'YES' %}
+            <span>You have completed all the tasks. Please continue with part 3 of presentation.
+            </span>           
+            {% endif %}
             <ul>
                 {% for item in items %}
                 <li class="item
@@ -202,7 +203,7 @@
                 {% elif item.status == 'reported' %}
                     reported
                 {% endif %}">
-                    <h3>{{ item.task }}</h3>
+                    <h4>{{ item.task }}</h4>
                     {% if item.status == 'default' or item.status == 'active' %}
                     <form method="post" action="{% url 'proceed_item' item.id %}">
                         {% csrf_token %}
@@ -214,8 +215,11 @@
             </ul>
         </div>
     </div>
+
+
+
     <div class="footer">
-        <p>Designed for Moby Phish Project</p>
+        <p>Designed for MobyPhish Project</p>
     </div>
 </body>
 </html>

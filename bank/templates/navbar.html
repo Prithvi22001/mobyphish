@@ -1,0 +1,43 @@
+<style>
+        .navbar {
+            width: 100%;
+            background-color: #b7d7e8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            box-sizing: border-box;
+            flex-wrap: wrap; /* Allow wrapping to prevent overflow */
+        }
+        .navbar h1 {
+            color: white;
+            margin: 0;
+            font-size: 24px;
+        }
+</style>
+<nav class="navbar" style="background-color:#b7d7e8;" >
+
+    <div class="navbar" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <h1>IlogicalLoansSavings</h1>
+            </li>
+
+            <li class="nav-item active" style="margin-left: 250%;">
+                <a class="nav-link" href="#">Account </a>
+            </li>
+            
+            <li class="nav-item active" >
+                <form method="post" action="{% url 'bank_login' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="reported" value="true">
+                    <button type="submit" class="report-button">Report This Website</button>
+                </form>            
+            </li>
+            
+        </ul>
+
+    </div>
+
+</nav>
+

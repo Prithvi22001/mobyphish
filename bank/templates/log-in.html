@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    {% include 'favicon.html' %}
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Log In</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .fake-navbar {
+            background-color: #0056b3;
+            color: #fff;
+            padding: 15px 30px;
+            display: flex;
+            justify-content: space-between;
+            box-shadow: 0px 2px 5px rgba(255, 254, 254, 0.2);
+        }
+
+        .fake-navbar a {
+            color: #ffffff;
+            text-decoration: none;
+            padding: 5px 10px;
+        }
+
+        .fake-navbar a:hover {
+            background-color: #ddd;
+        }
+
+        .header {
+            background-color: #0056b3;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin: 0;
+        }
+
+        .content {
+            padding: 20px;
+        }
+
+        .centered-box {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin: 0 auto;
+            width: 50%;
+        }
+
+        .bank-info {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .bank-logo {
+            width: 50px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .bank-name {
+            font-weight: bold;
+        }
+
+        .username-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .username-icon {
+            width: 60px;
+            height: auto;
+            margin-right: 10px;
+        }
+
+        .username {
+            font-weight: bold;
+        }
+
+        .amount-section {
+            background-color: #eee;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .amount-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .amount-input {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .rec-section {
+            background-color: #eee;
+            padding: 15px;
+            margin-top: 20px;
+            border: 1px solid #ddd;
+        }
+
+        .rec-label {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .rec-input {
+            width: 100%;
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .centered-button {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .send-button {
+            background-color: #007bff;
+            color: #fff;
+            padding: 20px 40px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 18px;
+        }
+
+        .footer {
+            background-color: #f2f2f2;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .content {
+            margin-bottom: 25px;
+        }
+
+        .error {
+            color: red;
+            margin-bottom: 15px;
+        }
+        
+        .report-frame {
+            display: none;
+            background-color: #f8f8f8;
+            padding: 20px;
+            border: 1px solid #ddd;
+            text-align: center;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1001;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+            width: 300px;
+            border-radius: 5px;
+        }
+
+        .report-frame p {
+            margin: 0;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .report-frame a {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .report-frame a:hover {
+            text-decoration: underline;
+        }
+
+        #report-button {
+            background: #ff0040;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 50px;
+            font-family: "Comic Sans MS", cursive, sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            animation: bounce 2s infinite;
+        }
+
+        #report-button img {
+            width: 20px;
+            height: auto;
+        }
+
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        #report-button:hover {
+            background: #ff3366;
+        }
+    </style>
+</head>
+<body>
+    <div class="fake-navbar">
+        <a href="#">IlogicalLoansSavings</a>
+        <a href="#">Withdraw</a>
+        <a href="#">Account</a>
+        <a href="#">Balance</a>
+    </div>
+
+    <div class="content">
+        <div class="centered-box">
+            <div class="bank-info">
+                <img src="{{ bank_logo }}" alt="Log-In" class="bank-logo">
+                <i>Ilogical Loans and Savings - Loans and Savings accounts too good to be true!</i>
+            </div>
+
+            <form method="post" action="{% url 'bank_login' %}">
+                {% csrf_token %}
+                <div class="username-container">
+                    <img src="{{ user_icon }}" alt="User Icon" class="username-icon">
+                    <h2 class="username">Please log in</h2>
+                </div>
+                <p>Type in your username and password to continue.</p>
+                <div class="amount-section">
+                    <label for="user_id" class="amount-label">Username:</label>
+                    <input type="text" id="user_id" name="user_id" class="amount-input" placeholder="Type in your username here" required>
+                </div>
+                <div class="rec-section">
+                    <label for="password" class="rec-label">Password:</label>
+                    <input type="password" id="password" name="password" class="rec-input" placeholder="Type in your password here" required>
+                </div>
+
+                {% if error %}
+                <p class="error">{{ error }}</p>
+                {% endif %}
+
+                <div class="centered-button">
+                    <button type="submit" class="send-button">LOG IN</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="report-frame" class="report-frame">
+        <p>You are reporting this page. This page is part of the MobyPhish experiment and is not a real site.
+          For more information, please visit the <a href="https://mobyphish.com">MobyPhish main page</a>.
+        </p>
+        <form method="post" action="{% url 'bank_login' %}">
+          {% csrf_token %}
+          <input type="hidden" name="reported" value="true">
+          <button type="submit" class="report-button">Report This Website</button>
+        </form>
+    </div>
+
+    <button id="report-button">
+        <img src="https://img.icons8.com/color/48/000000/megaphone.png" alt="Report Icon"> Report
+    </button>
+
+    <footer class="footer">
+        <p>Designed for MobyPhish Project</p>
+    </footer>
+
+    <script>
+        document.getElementById('report-button').addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent the default link action
+            var reportFrame = document.getElementById('report-frame');
+            // Toggle the display property
+            if (reportFrame.style.display === 'none' || reportFrame.style.display === '') {
+                reportFrame.style.display = 'block';
+            } else {
+                reportFrame.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

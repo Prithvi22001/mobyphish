@@ -1,9 +1,6 @@
 # # # from django.urls import path
 # # # from . import views
 
-# # # urlpatterns = [
-# # #     path('', views.index, name='index'),
-# # # ]
 
 # # from django.urls import path
 # # from .views import home, items_view, complete_item
@@ -27,7 +24,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.home, name='home'),
+    path('', views.index, name='index'),
+    path('get_started', views.get_started, name='get_started'),
+    path('study', views.study, name='study'),
+    path('home/', views.home, name='home'),
     path('logout/', views.logout_view, name='logout'),
     path('tasks/', views.items_view, name='tasks'),
     path('booking/', views.booking, name='booking'),
@@ -35,5 +35,9 @@ urlpatterns = [
     path('travel_page/<int:item_id>/', views.travel_page, name='travel_page'),
     path('proceed_item/<int:item_id>/', views.proceed_item, name='proceed_item'),
     path('complete_item/<int:item_id>/', views.complete_item, name='complete_item'),
+    path('survey',views.survey,name='survey'),
+    path('test_credentials',views.test_credentials,name='test_credentials'),
+    path('report',views.report,name='report'),
+    
 
 ]

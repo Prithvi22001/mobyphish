@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>MobyPhish Research Study</title>
+{% include 'favicon.html' %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
+.w3-bar,h1,button {font-family: "Montserrat", sans-serif}
+.fa-anchor,.fa-coffee {font-size:200px}
+</style>
+</head>
+<body>
+
+<div class="w3-top">
+  <div class="w3-bar w3-blue w3-card w3-left-align w3-large">
+    <a href="#" class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large w3-blue" href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
+    <a href="{% url 'index' %}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Home</a>
+    <a href="#" class="w3-bar-item w3-button w3-padding-large w3-white">The Study</a>
+    <a href="{% url 'get_started' %}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Get Started!</a>
+  </div>
+
+  <div id="navDemo" class="w3-bar-block w3-white w3-hide w3-hide-large w3-hide-medium w3-large">
+    <a href="#" class="w3-bar-item w3-button w3-padding-large">About Us</a>
+    <a href="#" class="w3-bar-item w3-button w3-padding-large">How to Participate!</a>
+  </div>
+</div>
+
+<header class="w3-container w3-blue w3-center">
+  <img src="{{ fish2 }}" alt="Image description"></i>
+  <h1 class="w3-margin w3-jumbo">MobyPhish</h1>
+  <p class="w3-xlarge">The Study</p>
+</header>
+
+<!-- First Grid -->
+<div class="w3-row-padding w3-padding-64 w3-container" id="study">
+  <div class="w3-content">
+    <div class="w3-twothird">
+      <h1>Our Study Project</h1>
+      <h5 class="w3-padding-32">Empowering End-Users Against PKI Vulnerabilities: A User-Centric Approach is an NSF funded, IRB approved joint research project with University of Connecticut and Trinity College. This usability study tests the effectiveness of our extension, MobyPhish, in empowering users to identify and mitigate phishing attacks.</h5>
+
+      <p class="w3-text-grey">To collect data that provides meaningful insights about user behavior, our study has three stages. The first stage is a short-term study, where participants come into our labs and complete tasks with and without MobyPhish’s help.</p>
+      <p class="w3-text-grey">Participants who finished the short-term study will have the opportunity to participate in our long-term study, the second stage of the usability study. During the long-term study participants will download MobyPhish to their personal computer and use it in their daily lives. In addition to this, they will complete 10 groups of tasks, similar to those in the short-study.</p>
+      <p class="w3-text-grey">Finally, if participants complete both short and long-term studies, they can participate in an exit study. This last stage allows participants to provide information about their experience with MobyPhish in a longer format.</p>
+      <p class="w3-text-grey">To collect data that provides meaningful insights about user behavior, our study has three stages. The first stage is a short-term study, where participants come into our labs and complete tasks with and without MobyPhish’s help.</p>
+
+      <h3 class="w3-padding-32 w3-text-blue">Sign Up for the Study</h3>
+      <p class="w3-text-grey">Choose your preferred location to sign up:</p>
+      <p><a href="https://calendly.com/gen_coms21-trincoll/mobyphish-registration" target="_blank"  class="w3-button w3-blue w3-padding-large w3-hover-light-blue">Sign Up for the study at University of Connecticut</a></p>
+      <p><a href="https://calendly.com/gen_coms21-trincoll/mobyphish-registration-clone"  target="_blank"  class="w3-button w3-blue w3-padding-large w3-hover-light-blue">Sign Up for the study at Trinity College</a></p>
+    </div>
+
+    <div class="w3-third w3-center">
+      <img src="{{ fish }}" alt="Image description"></i>
+    </div>
+  </div>
+</div>
+
+<!-- Second Grid -->
+<div class="w3-row-padding w3-light-grey w3-padding-64 w3-container">
+  <div class="w3-content">
+    <div class="w3-third w3-center">
+      <i class="fa fa-anchor w3-padding-64 w3-text-red"></i>
+    </div>
+
+    <div class="w3-twothird">
+      <h1>How to Participate!</h1>
+      <h5 class="w3-padding-32">We invite you to participate in our research study aimed at enhancing web security and protecting against phishing attacks. Here’s how you can get involved:</h5>
+
+      <p class="w3-text-grey">1.) Sign Up for the Usability Study: Register to participate in person at Trinity College or the University of Connecticut. You’ll engage with MobyPhish while browsing the web, contributing valuable insights.</p>
+      <p class="w3-text-grey">2.) Install MobyPhish on Your Laptop (At Your Own Risk): If you prefer, you can install the MobyPhish browser extension on your own laptop. Help us improve cybersecurity awareness and skills related to Public Key Infrastructure (PKI).</p>
+      <p class="w3-text-black">By participating, you’ll contribute to a safer online environment. Thank you for joining our mission!</p>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

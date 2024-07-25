@@ -1,7 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dataguard Messenger</title>
+    {% include 'favicon.html' %}
+
+    <title>CyberShield Solutions</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -13,6 +15,20 @@
             justify-content: center;
             align-items: center;
             height: 100vh;
+            overflow: hidden;
+        }
+        .warning-box {
+            display: flex;
+            background-color: #fff;
+            border: 2px solid red;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 900px;
+            width: 100%;
+            text-align: center;
+        }
+        .warning-box p{
+            margin:20px;
         }
         .container {
             background-color: white;
@@ -21,6 +37,7 @@
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             max-width: 400px;
             width: 100%;
+            height: 65%;
         }
         h1 {
             color: #333;
@@ -33,14 +50,14 @@
             margin-bottom: 20px;
         }
         form {
-            display: flex;
             flex-direction: column;
+            display: flex;
         }
         form p {
             margin-bottom: 15px;
             position: relative;
             display: flex;
-            align-items: center;
+            flex-direction: column;
         }
         form input {
             padding: 10px;
@@ -48,11 +65,11 @@
             border-radius: 5px;
             font-size: 16px;
             flex: 1;
+            margin-top: 5px;
         }
         .info-icon {
             margin-left: 10px;
             cursor: pointer;
-            position: relative;
             display: inline-block;
             width: 16px;
             height: 16px;
@@ -97,6 +114,7 @@
             font-size: 16px;
             cursor: pointer;
             margin-top: 10px;
+            align-self: center;
         }
         button:hover {
             background-color: #45a049;
@@ -104,7 +122,7 @@
         .footer {
             font-size: 10px;
             text-align: center;
-            margin-top: auto;
+            margin-top: 20px;
             padding: 10px;
             width: 100%;
             background-color: #f2f2f2;
@@ -126,16 +144,28 @@
 </head>
 <body>
     <div class="container">
-        <h1>Dataguard Messenger</h1>
-        <h2>Enter User ID</h2>
+        <h1>CyberShield Solutions</h1>
         <form method="post">
             {% csrf_token %}
+            {% if request.GET.message %}
+            <div class="alert alert-success">{{ request.GET.message }}</div>
+            {% endif %}
+    
             <p>
-                {{ form.user_id.label_tag }}
-                {{ form.user_id }}
+                <span>{{ form.user_id.label_tag }}
                 <span class="info-icon">i
-                    <span class="tooltip">User ID would be given to you when you sign up for this study.</span>
+                    <span class="tooltip">User-ID would be given to you when you fill the pre-survey form.</span>
+                </span> 
                 </span>
+                {{ form.user_id }}
+            </p>
+            <p>
+                <span>{{ form.password.label_tag }}
+                <span class="info-icon">i
+                    <span class="tooltip">Password would be given along with User-ID when you fill the pre-survey form.</span>
+                </span>
+                </span>
+                {{ form.password }}
             </p>
             {% if form.user_id.errors %}
                 <div class="error">
@@ -146,11 +176,13 @@
             {% endif %}
             <button type="submit">Submit</button>
         </form>
-        
     </div>
-    
+    <div class="warning-box">
+        <p><strong>Warning:</strong> This website is only meant to be used by participants of MobyPhish project held at Trinity College and University of Connecticut. If you are not a part of this study, kindly close this tab.</p>
+        <p><strong>All participants are only required to have a User-ID and Password provided to you after filling the pre-survey form for this study. DO NOT USE ANY OF YOUR PERSONAL CREDENTIALS ANYWHERE.</strong></p>
+    </div>
     <div class="footer">
-        <p>Designed for Moby Phish Project</p>
+        <p>Designed for MobyPhish Project</p>
     </div>
 </body>
 </html>

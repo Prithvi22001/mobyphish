@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<title>MobyPhish Research Study</title>
+{% include 'favicon.html' %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+body,h1,h2,h3,h4,h5,h6 {font-family: "Lato", sans-serif}
+.w3-bar,h1,button {font-family: "Montserrat", sans-serif}
+.fa-anchor,.fa-coffee {font-size:200px}
+</style>
+</head>
+<body>
+
+<div class="w3-top">
+  <div class="w3-bar w3-blue w3-card w3-left-align w3-large">
+    <a href="{% url 'index' %}" class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large w3-blue" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
+    <a href="{% url 'index' %}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Home</a>
+    <a href="{% url 'study' %}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">The Study</a>
+    <a href="#" class="w3-bar-item w3-button w3-padding-large w3-white">Get Started!</a>
+  </div>
+
+  <div id="navDemo" class="w3-bar-block w3-white w3-hide w3-hide-large w3-hide-medium w3-large">
+    <a href="#" class="w3-bar-item w3-button w3-padding-large">About Us</a>
+    <a href="#" class="w3-bar-item w3-button w3-padding-large">How to Participate!</a>
+  </div>
+</div>
+
+<header class="w3-container w3-blue w3-center" >
+  <img src="{{ fish2 }}" alt="Image description">
+  <h1 class="w3-margin w3-jumbo">MobyPhish</h1>
+  <p class="w3-xlarge">Get Started!</p>
+</header>
+
+<!-- First Grid -->
+<div class="w3-row-padding w3-padding-64 w3-container w3-center">
+  <div class="w3-content">
+    <div class="w3-twothird">
+      <h1>Get Started: MobyPhish Usability Study</h1>
+      <h5 class="w3-padding-32">Welcome to the MobyPhish usability study! As part of this research project, we’ve developed the browser extension “MobyPhish” to enhance your cybersecurity awareness and skills, specifically related to Public Key Infrastructure (PKI) vulnerabilities.
+      </h5>
+      <p class="w3-text-grey">Start by watching Part 1 of the presentation. This will lead you to the consent form and pre-study survey.</p>
+      <iframe src="https://1drv.ms/p/c/608044cfc8a3be81/IQPg5qFe-N9LSZVZLn_mkN03AWv6J0u9KOVkmz85XZ7Sskw?em=2&amp;wdAr=1.7777777777777777" width="80%" height="400px" frameborder="0">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
+    </div>
+  </div>
+</div>
+
+<!-- Second Grid -->
+<div class="w3-row-padding w3-light-grey w3-padding-64 w3-container w3-center">
+  <div class="w3-content">
+    <div class="w3-twothird">
+      <h5 class="w3-padding-32">After completing the survey, return to watch Part 2 of the presentation.</h5>
+      <iframe src="https://1drv.ms/p/c/608044cfc8a3be81/IQMl69HG78fAQrMBkCOdYp2xAX2cwk-S2_6mV_WlJ1MdX5M?em=2&amp;wdAr=1.7777777777777777" width="80%" height="400px" frameborder="0">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
+    </div>
+  </div>
+</div>
+
+<!-- Third Grid -->
+<div class="w3-row-padding w3-padding-64 w3-container w3-center">
+  <div class="w3-content">
+    <div class="w3-twothird">
+      <h5 class="w3-padding-32">Finish by watching Part 3 of the presentation. This will lead you to the post-study survey.</h5>
+      <iframe src="https://1drv.ms/p/c/608044cfc8a3be81/IQM69Cl3nsCTRoZzy8lDIp-OAd6VRiwcrKgVy0ReoZyn39I?em=2&amp;wdAr=1.7777777777777777" width="80%" height="400px" frameborder="0">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.</iframe>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

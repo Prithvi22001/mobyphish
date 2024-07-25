@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+{% include 'favicon.html' %}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IlogicalLoansSavings Banks</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Styles for the fake navbar */
+  .fake-navbar {
+    background-color: #0056b3; /* Light gray background */
+    color: #fff;; /* Dark gray text color */
+    padding: 15px 30px; /* Padding for the navbar */
+    display: flex; /* Make navbar a flexbox for alignment */
+    justify-content: space-between; /* Space items horizontally */
+    box-shadow: 0px 2px 5px rgba(255, 254, 254, 0.2); /* Subtle shadow */
+  }
+
+  .fake-navbar a {
+    color: #ffffff; /* Inherit text color from navbar */
+    text-decoration: none; /* Remove underline from links */
+    padding: 5px 10px; /* Padding for links */
+  }
+
+  .fake-navbar a:hover {
+    background-color: #ddd; /* Light gray hover effect */
+  }
+
+  .header {
+    background-color: #0056b3; /* Darker blue bar color */
+    color: #fff; /* White text color */
+    padding: 20px; /* Increased padding for wider bar */
+    text-align: center;
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Shadow for the bar */
+  }
+
+  .header h1 {
+    font-size: 24px;
+    margin: 0; /* Remove default margin from heading */
+  }
+
+  .content {
+    padding: 20px; /* Padding for content below the bar */
+  }
+
+  .centered-box {
+    background-color: #fff; /* White background for the box */
+    border: 1px solid #ddd; /* Light gray border */
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for the box */
+    padding: 20px; /* Padding inside the box */
+    margin: 0 auto; /* Center the box horizontally */
+    width: 50%; /* Set a width for the box */
+  }
+
+  .bank-info {
+    display: flex; /* Make bank info a flexbox for alignment */
+    align-items: center; /* Align items vertically */
+    margin-bottom: 15px; /* Spacing after bank info */
+  }
+
+  .bank-logo {
+    width: 50px; /* Adjust width as needed */
+    height: auto; /* Maintain image aspect ratio */
+    margin-right: 10px; /* Spacing between logo and bank name */
+  }
+
+  .bank-name {
+    font-weight: bold; /* Make bank name bold */
+  }
+
+  .username-container {
+    display: flex; /* Make username and icon a flexbox for alignment */
+    justify-content: center; /* Horizontally center elements */
+    align-items: center; /* Align items vertically */
+    margin-bottom: 25px; /* Increased spacing after username */
+  }
+
+  .username-icon {
+    width: 60px; /* Icon width */
+    height: auto; /* Maintain image aspect ratio */
+    margin-right: 10px; /* Spacing between icon and username */
+  }
+
+  .username {
+    font-weight: bold; /* Make username bold */
+  }
+
+  .amount-section {
+    background-color: #eee; /* Light gray background for amount section */
+    padding: 15px; /* Padding inside amount section */
+    margin-top: 20px; /* Spacing above amount section */
+    border: 1px solid #ddd; /* Light gray border for amount section */
+  }
+
+  .amount-label {
+    font-weight: bold; /* Make amount label bold */
+    margin-bottom: 5px; /* Spacing after label */
+    display: block; /* Force label on a new line */
+  }
+
+  .amount-input {
+    width: calc(100% - 20px); /* Make input full width minus padding for dollar sign */
+    padding-top: 5px; /* Padding for input */
+    padding-bottom: 5px; /* Padding for input */
+    border: 1px solid #ccc; /* Gray border for input */
+    border-radius: 5px; /* Rounded corners for input */
+  }
+
+  .rec-section {
+    background-color: #eee; /* Light gray background for rec section */
+    padding: 15px; /* Padding inside amount section */
+    margin-top: 20px; /* Spacing above amount section */
+    border: 1px solid #ddd; /* Light gray border for amount section */
+  }
+
+  .rec-label {
+    font-weight: bold; /* Make rec label bold */
+    margin-bottom: 5px; /* Spacing after label */
+    display: block; /* Force label on a new line */
+  }
+
+  .rec-input {
+    width: 100%; /* Make rec full width */
+    padding-top: 5px; /* Padding for input */
+    padding-bottom: 5px; /* Padding for input */    
+    border: 1px solid #ccc; /* Gray border for input */
+    border-radius: 5px; /* Rounded corners for input */
+  }
+
+  .centered-button {
+    text-align: center; /* Center the button within its container */
+    margin-top: 20px; /* Add spacing above the button */
+  }
+
+  .send-button {
+    background-color: #007bff; /* Blue background color */
+    color: #fff; /* White text color */
+    padding: 20px 40px; /* Add padding inside the button */
+    border: none; /* Remove default border */
+    border-radius: 5px; /* Add rounded corners */
+    cursor: pointer; /* Indicate clickable behavior */
+    font-size: 18px; /* Increase font size for the button text */
+  }
+
+  .footer {
+    background-color: #f2f2f2; /* Light gray background */
+    padding: 15px; /* Padding inside the footer */
+    text-align: center; /* Center the content within the footer */
+  }
+
+  .content { /* Add this style for the content section */
+    margin-bottom: 20px; /* Add space below the content */
+  }
+
+  .error {
+    color: red;
+    margin-bottom: 15px;
+  }
+
+  /* Popup styles */
+  .popup {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    left: 50%; /* Center horizontally */
+    top: 50%; /* Center vertically */
+    transform: translate(-50%, -50%); /* Translate to center */
+    padding: 20px; /* Padding inside popup */
+    background-color: #fff; /* White background */
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2); /* Subtle shadow */
+    z-index: 1000; /* Ensure on top */
+  }
+
+  .popup h3 {
+    margin: 0; /* Remove default margin */
+    font-size: 18px; /* Font size for heading */
+  }
+
+
+</style>
+</head>
+<body>
+  <div class="fake-navbar">
+    <a href="#">IlogicalLoansSavings Bank</a>
+    <a href="#">Withdraw</a>
+    <a href="#">Account</a>
+    <a href="#">Balance</a>
+  </div>
+
+{% include 'report.html' %}
+
+  <div id="report-frame" class="report-frame">
+    <p>You are reporting this page. This page is part of the MobyPhish experiment and is not a real site.
+      For more information, please visit the <a href="https://mobyphish.com">MobyPhish main page</a>.
+    </p>
+    <form method="post" action="{% url 'withdraw' %}">
+      {% csrf_token %}
+      <input type="hidden" name="reported" value="true">
+      <button type="submit" class="report-button">Report This Website</button>
+    </form>
+  </div>
+
+
+
+
+  <div class="content">
+    <div class="centered-box">
+      <div class="bank-info">
+        <img src="{{ bank_logo }}" alt="Log-In" class="bank-logo">
+      </div> 
+  
+      <div class="username-container">
+        <img src="{{ user_icon }}" alt="User Icon" class="username-icon">
+        <h2 class="username">{{ user_id }}</h2>
+      </div>
+      <form id="transaction-form" method="post" action="{% url 'withdraw' %}">
+        {% csrf_token %}
+        <p>Withdraw money to continue with payment.</p>
+        <div class="amount-section">
+          <label for="amount" class="amount-label">Amount to Pay:</label>
+          <span>$</span><input type="text" id="amount" name="amount" class="amount-input" value="{{ price }}">
+        </div>
+        <div class="rec-section">
+            <label for="to" class="rec-label">Paying:</label>
+            <input type="text" id="to" name="to" class="rec-input" value="{{ to }}">
+        </div>
+        <div class="centered-button">
+          <button type="submit" class="send-button">SEND MONEY</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="popup" class="popup">
+    <h3>Transaction in progress...</h3>
+  </div>
+
+
+  <footer class="footer">
+    <p>Designed for MobyPhish Project</p>
+  </footer>
+
+  <script>
+    document.getElementById('transaction-form').addEventListener('submit', function(event) {
+      event.preventDefault(); // Prevent the default form submission
+
+      // Show the popup
+      document.getElementById('popup').style.display = 'block';
+
+      // Wait for a few seconds (e.g., 3 seconds) before submitting the form
+      setTimeout(() => {
+        event.target.submit(); // Submit the form
+      }, 3000); // 3000 milliseconds = 3 seconds
+    });
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+/** design of the footer*/
+.footer {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: space-between;
+    font-size: 10pt;
+    padding: 3px;
+    background-color: #b7d7e8;
+    color: white;
+    position: sticky;
+}
+
+/** removes typical link style from links in footer*/
+.footer a {
+    color: white;
+    text-decoration: none;
+    display: block;
+}
+
+.footer a:hover {
+    color: #1b263b;
+}
+
+/** designs heading in the footer */
+.footer h4 {
+    margin-bottom: 0;
+    font-size: 12pt;
+    color: #1B263B;
+}
+
+.footer li {
+    padding: 0.25rem;
+}
+
+/** removes indent and bullet point from lists in footer*/
+.footer ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin-top: 0.5rem;
+}
+
+.footer img {
+    margin: 1rem;
+}
+
+.learnmore {
+    display: block;
+    padding: 1rem;
+    background-color: #b7d7e8;
+    color: black;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-bottom: 2rem;
+}
+
+.learnmore:hover {
+    background-color: #87bdd8;
+}
