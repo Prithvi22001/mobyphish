@@ -31,10 +31,11 @@ ALLOWED_HOSTS = ['.mobyphish.com','localhost','127.0.0.1']
 NO_OF_TASKS=2
 SEARCH_RESULTS=2
 CSRF_TRUSTED_ORIGINS = ['https://*.mobyphish.com','http://*.127.0.0.1']
-SESSION_COOKIE_DOMAIN = ".mobyphish.com"
-SESSION_COOKIE_SECURE = True
-SESSION_COOKIE_SAMESITE = None
-X_FRAME_OPTIONS = 'SAMEORIGIN' 
+if DEBUG:
+    SESSION_COOKIE_DOMAIN = ".mobyphish.com"
+    SESSION_COOKIE_SECURE = True
+    SESSION_COOKIE_SAMESITE = None
+    X_FRAME_OPTIONS = 'SAMEORIGIN' 
 # Application definition
 
 INSTALLED_APPS = [
@@ -84,23 +85,25 @@ WSGI_APPLICATION = 'messaging.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
+if DEBUG:
 
-DATABASES = {
-    'default': {
-            'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'moby',
-            'USER': 'admin',
-            'PASSWORD': 'moby',
-            'HOST': '137.99.25.227',
-            'PORT': '5432', # default PostgreSQL port
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': 'pass',
+                'USER': 'pass',
+                'PASSWORD': 'pass',
+                'HOST': 'xxxxxxxx',
+                'PORT': '5432', # default PostgreSQL port
+        }
+    }
 
 
 # Password validation

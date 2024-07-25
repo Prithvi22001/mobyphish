@@ -23,8 +23,11 @@ def bank_login(request):
             request.session['reported']=True
             url=f"https://mobyphish.com/complete_item/"+str(request.session.get('item_id'))+"/"    
             logger.info(f"USER: {user_id} reported {request.build_absolute_uri()}")
-            return redirect(url)
-            # return redirect('complete_item',item_id=request.session.get('item_id'))
+            if settings.DEBUG:
+                return redirect('complete_item',item_id=request.session.get('item_id'))
+            else:
+                return redirect(url)
+
 
 
         else:
@@ -52,7 +55,6 @@ def bank_login(request):
                     for cookie in request.COOKIES:
                         response.delete_cookie(cookie)
                     return response
-                    # return redirect('https://mobyphish.com/home')
                 logger.info(f"USER: {user_id} moving to withdraw page ,to={to} & price={price}")
                 url = f"{reverse('withdraw')}?to={to}&price={price}"
                 return redirect(url)
@@ -76,8 +78,11 @@ def withdraw(request):
         if reported:
             request.session['reported']=True
             url=f"https://mobyphish.com/complete_item/"+str(request.session.get('item_id'))+"/"           
-            return redirect(url)
-            # return redirect('complete_item',item_id=request.session.get('item_id'))
+            if settings.DEBUG:
+                return redirect('complete_item',item_id=request.session.get('item_id'))
+            else:
+                return redirect(url)
+
         else:
             request.session['reported']=False
 
@@ -88,10 +93,11 @@ def withdraw(request):
             transaction.save()
             logger.info(f"USER: {user_id},  PAID  : {request.session.get('item_id')}")
             url=f"https://mobyphish.com/complete_item/"+str(request.session.get('item_id'))+"/"           
-            return redirect(url)
-            # return redirect('complete_item',item_id=request.session.get('item_id'))
+            if settings.DEBUG:
+                return redirect('complete_item',item_id=request.session.get('item_id'))
+            else:
+                return redirect(url)
 
-            # return render(request, 'bank-checkout.html', {'message': 'Withdrawal successful!'})
         except BankUser.DoesNotExist:
             return redirect('bank_login')
     context = {
