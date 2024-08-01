@@ -41,6 +41,7 @@ class Item(models.Model):
     bank_vist=models.IntegerField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='default')
     phish = models.BooleanField(default=False)
+    phish_type = models.CharField(null=True,default='url')
     result= models.CharField(max_length=10, choices=RESULT_CHOICES, default='sucess')
 
     def __str__(self):
@@ -71,6 +72,7 @@ class ItemDump(models.Model):
     bank_vist=models.IntegerField(null=True, blank=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='default')
     phish = models.BooleanField(default=False)
+    phish_type = models.CharField(null=True,default='url')
     result= models.CharField(max_length=10, choices=RESULT_CHOICES, default='sucess')
 
     def __str__(self):

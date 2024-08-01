@@ -97,10 +97,10 @@ else:
     DATABASES = {
         'default': {
                 'ENGINE': 'django.db.backends.postgresql',
-                'NAME': 'pass',
-                'USER': 'pass',
-                'PASSWORD': 'pass',
-                'HOST': 'xxxxxxxx',
+                'NAME': 'moby',
+                'USER': 'admin',
+                'PASSWORD': 'moby',
+                'HOST': '137.99.25.227',
                 'PORT': '5432', # default PostgreSQL port
         }
     }

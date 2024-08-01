@@ -161,7 +161,7 @@ def items_view(request):
 
 
 
-    # Generate tasks only if the number of default tasks is less than 4
+    # Generate tasks only if the number of default tasks is less than NO_OF_TASKS
     if default_tasks_count+complete_tasks_count+active_tasks_count< settings.NO_OF_TASKS:
 
         for i in range(settings.NO_OF_TASKS):
@@ -205,6 +205,7 @@ def items_view(request):
 
         elif default_tasks_count+active_tasks_count==0 and user.round_no == 2:
             logger.info(f"USER: {user_id} both round completed")
+
             return render(request, 'items.html', {'items': '','completed':"YES"})
 
 
@@ -217,11 +218,23 @@ def items_view(request):
         phish_count = item_count // 2  # 20% of items
         phish_items = random.sample(list(default_items), phish_count)
         
-        for item in phish_items:
+        url_attack_count = (2 * phish_count) // 3
+        cert_attack_count = phish_count - url_attack_count
+        url_attack_items = random.sample(phish_items, url_attack_count)
+        cert_attack_items = [item for item in phish_items if item not in url_attack_items]
+
+        for item in url_attack_items:
             if not item.phish:
                 item.phish = True
+                item.phish_type = 'url'
                 item.save()
-        
+
+        for item in cert_attack_items:
+            if not item.phish:
+                item.phish = True
+                item.phish_type = 'cert'
+                item.save()
+
     # Order items by status
     status_order = ['active', 'default', 'completed', 'reported', 'incorrect']
     ordered_items = sorted(items, key=lambda x: status_order.index(x.status))
@@ -244,6 +257,7 @@ def proceed_item(request, item_id):
         if active_item.id==item.id:
             logger.info(f"USER : {user_id}, ITEM ID: {item_id} active item clicked again")
             request.session['phish'] = item.phish
+            request.session['phish_type'] = item.phish_type
             request.session['item_id'] = item_id 
             # request.session.modified = True
             request.session.save()  # Explicitly save the session
@@ -261,6 +275,7 @@ def proceed_item(request, item_id):
         if item.status=='active':
             logger.info(f"USER: {user_id}, ITEM ID: {item_id} active item clicked ")
             request.session['phish'] = item.phish
+            request.session['phish_type'] = item.phish_type
             request.session['item_id'] = item_id 
             # request.session.modified = True
             request.session.save()  # Explicitly save the session
@@ -276,6 +291,7 @@ def proceed_item(request, item_id):
             item.all_info=item.all_info
             item.save()
             request.session['phish'] = item.phish
+            request.session['phish_type'] = item.phish_type
             request.session['item_id'] = item_id 
             # request.session.modified = True
             request.session.save()  # Explicitly save the session
@@ -435,7 +451,9 @@ def booking(request):
             item_id = request.POST.get('item_id')
             
         phish = request.session.get('phish', None)  # Default to None to see if it is missing
-        logger.info(f"USER: {user_id}, ITEM: {item_id}, making URL because phish={phish}")
+        phish_type = request.session.get('phish_type', None)  # Default to None to see if it is missing
+
+        logger.info(f"USER: {user_id}, ITEM: {item_id}, making URL because phish={phish} and phish_type={phish_type}")
 
         # Check if phish is None and log it
         if phish is None:
@@ -454,13 +472,14 @@ def booking(request):
             bad_urls=['acct-IlogicalLoansSavings','acct.Ilogical.LoansSavings','acct.IIogicalLoansSavings','acct.llogicalLoansSavings','acct.IlogicalLoanSavings','acct.IlogicaILoansSavings','acct.lIogicalLoansSavings']
             bad_prefix=['wcwm','wzho']
             url=''
-            if random.random()<0.5:
-                logger.info(f"USER: {user_id}, ITEM: {item_id} cert attack")
+            if phish_type=='cert':
+                logger.info(f"USER: {user_id}, ITEM: {item_id} ,phish_type:{phish_type} so ,cert attack")
                 url='https://'+random.choice(bad_prefix)+'.'+good_url+'.mobyphish.com/bank_login'
             else:
-                logger.info(f"USER: {user_id}, ITEM: {item_id} url attack")
+                logger.info(f"USER: {user_id}, ITEM: {item_id} ,phish_type:{phish_type} so ,url attack")
                 url='https://'+'w'+pre+'.'+random.choice(bad_urls)+'.mobyphish.com/bank_login'
         else:
+            logger.info(f"USER: {user_id}, ITEM: {item_id} no attack")
             url='https://'+'w'+pre+'.'+good_url+'.mobyphish.com/bank_login'
         logger.info(f"USER: {user_id}, ITEM: {item_id} redirecting to {url}")
 
