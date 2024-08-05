@@ -55,6 +55,8 @@ def home(request):
                     response = redirect('tasks')
                     response.set_cookie('user_id', user_id)
                     response.set_cookie('use_extension', user.use_extension)
+                    response.set_cookie('long_term', user.long_term)
+                    response.set_cookie('long_term_group', user.long_term_group)
 
                     logger.info(f"USER: {user_id} logged in and use_extension is set as {user.use_extension}")
                     return response
@@ -86,10 +88,13 @@ def generate_random_code(length=4):
     # return ''.join(random.choice(characters) for _ in range(length))
 
 last_use_extension = False
+long_term_group= 1
 
 @csrf_exempt
 def survey(request):
-    global last_use_extension 
+    global last_use_extension
+    global long_term_group 
+
     if request.method== 'POST' :
         data= json.loads(request.body)
         logger.info(f"Got request from qualtrics creating userID and password")
@@ -106,7 +111,8 @@ def survey(request):
         last_use_extension = use_extension
         
 
-        new_user=User(user_id=userID,password=bank_password,use_extension=use_extension,round_no=1)
+        new_user=User(user_id=userID,password=bank_password,use_extension=use_extension,round_no=1,long_term=False,long_term_group=long_term_group)
+        long_term_group= long_term_group+1 if long_term_group<3 else 1
         new_user.save()
         bank_user = BankUser(user_id=userID,password=bank_password)
         bank_user.save()
@@ -117,7 +123,9 @@ def survey(request):
 
 @csrf_exempt
 def test_credentials(request):
-    global last_use_extension 
+    global last_use_extension
+    global long_term_group 
+
     if request.method== 'GET' :
         # data= json.loads(request.body)
         logger.info(f"Got request from test_credentials creating userID and password")
@@ -132,9 +140,10 @@ def test_credentials(request):
         # Alternate use_extension value
         use_extension = not last_use_extension
         last_use_extension = use_extension
-        
 
-        new_user=User(user_id=userID,password=bank_password,use_extension=use_extension,round_no=1)
+
+        new_user=User(user_id=userID,password=bank_password,use_extension=use_extension,round_no=1,long_term=False,long_term_group=long_term_group)
+        long_term_group= long_term_group+1 if long_term_group<3 else 1
         new_user.save()
         bank_user = BankUser(user_id=userID,password=bank_password)
         bank_user.save()
@@ -164,7 +173,7 @@ def items_view(request):
     # Generate tasks only if the number of default tasks is less than NO_OF_TASKS
     if default_tasks_count+complete_tasks_count+active_tasks_count< settings.NO_OF_TASKS:
 
-        for i in range(settings.NO_OF_TASKS):
+        for _ in range(settings.NO_OF_TASKS):
             default_tasks_count = Item.objects.filter(user=user, status='default').count()
             if default_tasks_count+complete_tasks_count +active_tasks_count+reported_tasks_count< settings.NO_OF_TASKS:
                 ans=task_generate.generate_task()
@@ -205,9 +214,40 @@ def items_view(request):
 
         elif default_tasks_count+active_tasks_count==0 and user.round_no == 2:
             logger.info(f"USER: {user_id} both round completed")
+            items = Item.objects.filter(user=user)
+            for item in items:
+                ItemDump.objects.create(
+                    user=item.user,
+                    task=item.task,
+                    results=item.results,
+                    all_info=item.all_info,
+                    message=item.message,
+                    time_start=item.time_start,
+                    time_end=item.time_end,
+                    bank_vist=item.bank_vist,
+                    status=item.status,
+                    phish=item.phish,
+                    result=item.result
+                )
+            items.delete()
 
-            return render(request, 'items.html', {'items': '','completed':"YES"})
-
+            # response = redirect('tasks')
+            user.round_no += 1 
+            user.use_extension=True
+            user.long_term=True
+            long_term_group=user.long_term_group
+            user.save()
+            user_id = request.COOKIES['user_id']
+            response = render(request, 'items.html', {'items': '', 'completed': "YES"})
+            # for cookie in request.COOKIES:
+            #     response.delete_cookie(cookie)
+            
+            response.set_cookie('user_id', user_id)
+            response.set_cookie('use_extension', True )
+            response.set_cookie('long_term', True )
+            response.set_cookie('long_term_group', long_term_group )
+            # return render(request, 'items.html', {'items': '','completed':"YES"})
+            return response
 
     items = Item.objects.filter(user=user)
     active_item = items.filter(status='active').first()
@@ -464,12 +504,12 @@ def booking(request):
         item.save()
 
         ###TODO PHISHING ATTACKS
-        good_url='acct.IlogicalLoansSavings'            
+        good_url='acct.ilogicalLoansSavings'            
         letters = string.ascii_lowercase
         pre=''.join(random.choice(letters) for i in range(3))
 
         if phish:
-            bad_urls=['acct-IlogicalLoansSavings','acct.Ilogical.LoansSavings','acct.IIogicalLoansSavings','acct.llogicalLoansSavings','acct.IlogicalLoanSavings','acct.IlogicaILoansSavings','acct.lIogicalLoansSavings']
+            bad_urls=['acct-ilogicalLoansSavings','acct.ilogical.LoansSavings','acct.iIogicalLoansSavings','acct.llogicalLoansSavings','acct.ilogicalLoanSavings','acct.ilogicaILoansSavings','acct.lIogicalLoansSavings']
             bad_prefix=['wcwm','wzho']
             url=''
             if phish_type=='cert':

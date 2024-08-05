@@ -9,6 +9,8 @@ class User(models.Model):
     password=models.CharField(max_length=100)
     round_no=models.IntegerField(null=True, blank=True)
     use_extension=models.BooleanField(default=False)
+    long_term=models.BooleanField(default=False)
+    long_term_group=models.IntegerField(null=True, blank=True)
     
     def check_password(self, raw_password):
         return raw_password==self.password
