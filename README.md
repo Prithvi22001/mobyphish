@@ -1,8 +1,8 @@
-# Mobphish Website
+# Mobyphish Website
 
 ## Getting Started
 
-Follow these steps to set up a local development environment for the Mobphish website.
+Follow these steps to set up a local development environment for the Mobyphish website.
 
 ### Prerequisites
 
