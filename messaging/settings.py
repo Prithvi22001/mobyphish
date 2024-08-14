@@ -28,8 +28,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['.mobyphish.com','localhost','127.0.0.1']
 
-NO_OF_TASKS=2
-SEARCH_RESULTS=2
+NO_OF_TASKS=15
+SEARCH_RESULTS=3
 CSRF_TRUSTED_ORIGINS = ['https://*.mobyphish.com','http://*.127.0.0.1']
 if not DEBUG:
     SESSION_COOKIE_DOMAIN = ".mobyphish.com"

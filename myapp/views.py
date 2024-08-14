@@ -29,20 +29,45 @@ def index(request):
 
     return render(request,'mobyphish.html', {'mail':mail,'fish': fish,'fish2':fish2 } )
 
-def get_started(request):
+def experiment(request):
     fish2=settings.MEDIA_URL+'fish2.png'
     fish=settings.MEDIA_URL+'fish.jpeg'
+    mail=settings.MEDIA_URL+'mail1.png'
 
     return render(request,'mobyphish-get-started.html', {'fish': fish,'fish2':fish2 } )
 
 def study(request):
     fish2=settings.MEDIA_URL+'fish2.png'
     fish=settings.MEDIA_URL+'fish.jpeg'
+    mail=settings.MEDIA_URL+'mail1.png'
+
 
     return render(request,'mobyphishstudy.html', {'fish': fish,'fish2':fish2 } )
 
+def about(request):
+    fish2=settings.MEDIA_URL+'fish2.png'
+    fish=settings.MEDIA_URL+'fish.jpeg'
+    mail=settings.MEDIA_URL+'mail1.png'
 
-def home(request):
+    return render(request,'mobyphisabout.html', {'mail':mail,'fish': fish,'fish2':fish2 } )
+
+def extension(request):
+    fish2=settings.MEDIA_URL+'fish2.png'
+    fish=settings.MEDIA_URL+'fish.jpeg'
+    mail=settings.MEDIA_URL+'mail1.png'
+
+    return render(request,'mobyphishextension.html', {'mail':mail,'fish': fish,'fish2':fish2 } )
+
+def long_term(request):
+    fish2=settings.MEDIA_URL+'fish2.png'
+    fish=settings.MEDIA_URL+'fish.jpeg'
+    mail=settings.MEDIA_URL+'mail1.png'
+
+    return render(request,'mobyphishlongterm.html', {'mail':mail,'fish': fish,'fish2':fish2 } )
+
+
+
+def login(request):
     if request.method == 'POST':
         form = UserIdForm(request.POST)
         if form.is_valid():
@@ -55,8 +80,8 @@ def home(request):
                     response = redirect('tasks')
                     response.set_cookie('user_id', user_id)
                     response.set_cookie('use_extension', user.use_extension)
-                    response.set_cookie('long_term', user.long_term)
-                    response.set_cookie('long_term_group', user.long_term_group)
+                    response.set_cookie('long_term', user.long_term,max_age=60*60*24*365*2)
+                    response.set_cookie('long_term_group', user.long_term_group,max_age=60*60*24*365*2)
 
                     logger.info(f"USER: {user_id} logged in and use_extension is set as {user.use_extension}")
                     return response
@@ -70,8 +95,11 @@ def home(request):
 def logout_view(request):
     response = redirect('home')
     request.session.flush()
+    preserve_cookies = ['long_term', 'long_term_group']
+
     for cookie in request.COOKIES:
-        response.delete_cookie(cookie)
+        if cookie not in preserve_cookies :
+            response.delete_cookie(cookie)
     return response
 
 def generate_random_code(length=4):
@@ -209,7 +237,9 @@ def items_view(request):
             url = reverse('home') + f'?message={message}'
             response = redirect(url)
             for cookie in request.COOKIES:
-                response.delete_cookie(cookie)
+                preserve_cookies = ['long_term', 'long_term_group']
+                if cookie not in preserve_cookies :
+                    response.delete_cookie(cookie)
             return response
 
         elif default_tasks_count+active_tasks_count==0 and user.round_no == 2:
@@ -244,8 +274,8 @@ def items_view(request):
             
             response.set_cookie('user_id', user_id)
             response.set_cookie('use_extension', True )
-            response.set_cookie('long_term', True )
-            response.set_cookie('long_term_group', long_term_group )
+            response.set_cookie('long_term', True ,max_age=60*60*24*365*2)
+            response.set_cookie('long_term_group', long_term_group,max_age=60*60*24*365*2 )
             # return render(request, 'items.html', {'items': '','completed':"YES"})
             return response
 
@@ -255,7 +285,7 @@ def items_view(request):
     if new_generated_tasks:
         default_items = items.filter(status='default')
         item_count = default_items.count()
-        phish_count = item_count // 2  # 20% of items
+        phish_count = item_count // 5  # 20% of items
         phish_items = random.sample(list(default_items), phish_count)
         
         url_attack_count = (2 * phish_count) // 3

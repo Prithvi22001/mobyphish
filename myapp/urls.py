@@ -25,9 +25,7 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('get_started', views.get_started, name='get_started'),
-    path('study', views.study, name='study'),
-    path('home/', views.home, name='home'),
+    path('login/', views.login, name='login'),
     path('logout/', views.logout_view, name='logout'),
     path('tasks/', views.items_view, name='tasks'),
     path('booking/', views.booking, name='booking'),
@@ -38,6 +36,11 @@ urlpatterns = [
     path('survey',views.survey,name='survey'),
     path('test_credentials',views.test_credentials,name='test_credentials'),
     path('report',views.report,name='report'),
+    path('about',views.about,name='about'),
+    path('extension',views.extension,name='extension'),
+    path('study',views.study,name='study'),
+    path('experiment',views.experiment,name='experiment'),
+    path('long_term',views.long_term,name='long_term'),
     
 
 ]

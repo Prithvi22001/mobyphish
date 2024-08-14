@@ -1,0 +1,14 @@
+INFO 2024-08-09 03:00:12,656 views USER: test logged in and use_extension is set as True
+INFO 2024-08-09 03:00:12,676 views test Entering items_view function
+INFO 2024-08-09 03:00:52,373 views USER: test ,ITEM ID: 50 started at 1723172452 this item is phished False
+INFO 2024-08-09 03:00:52,373 views USER: test ,ITEM ID: 50 started at 1723172452 this sissiondict_items([('phish', False), ('phish_type', 'url'), ('item_id', 50)])
+INFO 2024-08-09 03:00:56,177 views USER: test,ITEM ID: 49 not active clicked
+INFO 2024-08-09 03:00:56,194 views test Entering items_view function
+INFO 2024-08-09 03:01:01,068 views USER: test,ITEM ID: 49 not active clicked
+INFO 2024-08-09 03:01:01,086 views test Entering items_view function
+INFO 2024-08-09 03:01:01,762 views USER: test,ITEM ID: 49 not active clicked
+INFO 2024-08-09 03:01:01,790 views test Entering items_view function
+INFO 2024-08-09 03:01:02,160 views USER: test,ITEM ID: 49 not active clicked
+INFO 2024-08-09 03:01:02,178 views test Entering items_view function
+INFO 2024-08-09 03:01:22,680 views USER: test logged in and use_extension is set as True
+INFO 2024-08-09 03:01:22,696 views test Entering items_view function

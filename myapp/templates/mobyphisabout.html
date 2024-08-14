@@ -1,0 +1,31 @@
+{% include 'base.html' %}
+{% block content %}
+
+<!-- First Grid -->
+<div class="w3-row-padding w3-padding-64 w3-container" id="about">
+  <div class="w3-content">
+    <div class="w3-twothird">
+      <h1>About Us</h1>
+      <h5 class="w3-padding-32">We are a team of individuals from UCONN and Trinity College that created the extension “MobyPhish” to help the world get better at protecting themselves from phishing attacks.</h5>
+
+      <p class="w3-text-grey">This project aims to address vulnerabilities in Public Key Infrastructure (PKI) that may undermine web connection confidentiality, integrity, and authenticity. Failures in PKI can enable attackers to forge web (SSL/TLS) certificates and perform website spoofing and man-in-the-middle attacks. Such attacks can lead to identity theft, surveillance, and the compromise of sensitive information.
+        Our objective is to empower end-users to identify and mitigate these threats through a user-centric solution, a browser extension designed to improve users’ cybersecurity awareness and skills, particularly regarding PKI. 
+
+      </p>
+      <p class="w3-text-grey">The overarching goal is to enable users to make informed decisions and adopt safer Internet habits through continuous, test-based cybersecurity training embedded within their daily Internet use.
+The project consists of two phases. The first phase involves a usability study to evaluate the extension’s effectiveness against phishing attacks and to gather data on its practicality and impact on user behavior. Study insights will inform the second phase focused on refining the extension based on the feedback and data obtained, with the goal of developing an improved version for broader public release. This comprehensive approach will provide valuable insights into the intersection of usability, privacy, and security.
+
+      </p>
+    </div>
+
+    <div class="w3-third w3-center">
+      <img src="../../static/mobyphishLogo.webp" alt="MobyPhish logo" width="50%"></i>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% include 'contact.html' %}
+
+
+  
