@@ -188,7 +188,6 @@ def test_credentials(request):
 def extension_download(request):
 
     if request.method== 'POST' :
-        data= json.loads(request.body)
         logger.info(f"Got request from qualtrics to download extension")
         token=""
         while True:
