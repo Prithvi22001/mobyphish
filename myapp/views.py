@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import User, Item, ItemDump
+from .models import User, Item, ItemDump,Extension
 from bank.models import BankUser,Transaction
 from .forms import UserIdForm
 import time
@@ -18,6 +18,7 @@ from datetime import datetime
 from django.views.decorators.csrf import csrf_exempt
 import logging
 from django.urls import reverse
+import os
 
 
 logger = logging.getLogger('myapp')
@@ -40,7 +41,6 @@ def study(request):
     fish2=settings.MEDIA_URL+'fish2.png'
     fish=settings.MEDIA_URL+'fish.jpeg'
     mail=settings.MEDIA_URL+'mail1.png'
-
 
     return render(request,'mobyphishstudy.html', {'fish': fish,'fish2':fish2 } )
 
@@ -101,6 +101,11 @@ def logout_view(request):
         if cookie not in preserve_cookies :
             response.delete_cookie(cookie)
     return response
+
+def generate_token(length=6):
+    characters =  string.digits + string.ascii_letters
+    token=''.join(random.choice(characters) for _ in range(length))
+    return token
 
 def generate_random_code(length=4):
 
@@ -177,6 +182,40 @@ def test_credentials(request):
         bank_user.save()
         logger.info(f"Created {userID} with PASSWORD: {bank_password} and use_extension: {use_extension}")
         return JsonResponse({'randomID':userID,'password':bank_password})
+
+
+@csrf_exempt
+def extension_download(request):
+
+    if request.method== 'POST' :
+        data= json.loads(request.body)
+        logger.info(f"Got request from qualtrics to download extension")
+        token=""
+        while True:
+            token=generate_token()
+            if not Extension.objects.filter(token=token).exists():
+                break
+        
+        temp=Extension(token=token)
+        temp.save()
+        return JsonResponse({'token':token})
+
+@csrf_exempt
+def download(request,token):
+    extension = get_object_or_404(Extension, token=token)
+    
+    # Define the path to the ZIP file you want to download
+    zip_file_path = os.path.join(settings.MEDIA_ROOT, 'PKI_CHROME.zip')
+    
+    if not os.path.exists(zip_file_path):
+        raise Http404("ZIP file does not exist")
+    
+    # Open the file and return it as a response
+    with open(zip_file_path, 'rb') as zip_file:
+        response = HttpResponse(zip_file.read(), content_type='application/zip')
+        response['Content-Disposition'] = f'attachment; filename={os.path.basename(zip_file_path)}'
+        return response
+
 
 
 def items_view(request):

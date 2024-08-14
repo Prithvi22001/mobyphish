@@ -18,6 +18,10 @@ class User(models.Model):
     def __str__(self):
         return self.user_id
 
+class Extension(models.Model):
+    token=models.CharField(max_length=10,unique=True)
+
+
 class Item(models.Model):
     STATUS_CHOICES = [
         ('default', 'Default'),
