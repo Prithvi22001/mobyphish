@@ -93,7 +93,7 @@ def login(request):
     return render(request, 'home.html', {'form': form})
 
 def logout_view(request):
-    response = redirect('home')
+    response = redirect('login')
     request.session.flush()
     preserve_cookies = ['long_term', 'long_term_group']
 
@@ -223,7 +223,7 @@ def download(request,token):
 
 def items_view(request):
     if 'user_id' not in request.COOKIES:
-        return redirect('home')
+        return redirect('login')
 
     user_id = request.COOKIES['user_id']
     user = get_object_or_404(User, user_id=user_id)
@@ -276,7 +276,7 @@ def items_view(request):
             message = 'Round completed. Proceed to the next round.'
             request.session.flush()
 
-            url = reverse('home') + f'?message={message}'
+            url = reverse('login') + f'?message={message}'
             response = redirect(url)
             for cookie in request.COOKIES:
                 preserve_cookies = ['long_term', 'long_term_group']
@@ -356,7 +356,7 @@ def items_view(request):
 
 def proceed_item(request, item_id):
     if 'user_id' not in request.COOKIES:
-        return redirect('home')
+        return redirect('login')
 
     user_id = request.COOKIES['user_id']
     user = get_object_or_404(User, user_id=user_id)

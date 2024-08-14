@@ -50,7 +50,7 @@ def bank_login(request):
                     message = 'Something went wrong please try again.'
                     request.session.flush()
 
-                    url = 'https://mobyphish.com/home'+ f'?message={message}'
+                    url = 'https://mobyphish.com/login'+ f'?message={message}'
                     response = redirect(url)
                     for cookie in request.COOKIES:
                         response.delete_cookie(cookie)
