@@ -8,7 +8,7 @@ import urllib.parse
 from . import task_generate
 from django.conf import settings
 import json
-from django.http import JsonResponse
+from django.http import JsonResponse , Http404 , HttpResponse
 import ast
 import pickle
 import datetime
@@ -201,13 +201,17 @@ def extension_download(request):
 
 @csrf_exempt
 def download(request,token):
+    logger.info(f"GOT DOWNLOAD TOKEN {token}")
     extension = get_object_or_404(Extension, token=token)
     
     # Define the path to the ZIP file you want to download
     zip_file_path = os.path.join(settings.MEDIA_ROOT, 'PKI_CHROME.zip')
+    logger.error(f"Download fie path {zip_file_path}")
     
     if not os.path.exists(zip_file_path):
+        logger.error(f"not file found {zip_file_path}")
         raise Http404("ZIP file does not exist")
+
     
     # Open the file and return it as a response
     with open(zip_file_path, 'rb') as zip_file:

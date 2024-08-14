@@ -41,7 +41,7 @@ urlpatterns = [
     path('study',views.study,name='study'),
     path('experiment',views.experiment,name='experiment'),
     path('long_term',views.long_term,name='long_term'),
-    path('download/<int:token>/',views.download,name='download'),
+    path('download/<str:token>/',views.download,name='download'),
     path('extension_download',views.extension_download,name='extension_download'),
     
 
