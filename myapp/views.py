@@ -201,24 +201,26 @@ def extension_download(request):
 
 @csrf_exempt
 def download(request,token):
-    logger.info(f"GOT DOWNLOAD TOKEN {token}")
-    extension = get_object_or_404(Extension, token=token)
-    
-    # Define the path to the ZIP file you want to download
-    zip_file_path = os.path.join(settings.MEDIA_ROOT, 'PKI_CHROME.zip')
-    logger.error(f"Download fie path {zip_file_path}")
-    
-    if not os.path.exists(zip_file_path):
-        logger.error(f"not file found {zip_file_path}")
-        raise Http404("ZIP file does not exist")
+    try:
+        logger.info(f"GOT DOWNLOAD TOKEN {token}")
+        extension = get_object_or_404(Extension, token=token)
+        
+        # Define the path to the ZIP file you want to download
+        zip_file_path = os.path.join(settings.MEDIA_ROOT, 'PKI_CHROME.zip')
+        logger.error(f"Download fie path {zip_file_path}")
+        
+        if not os.path.exists(zip_file_path):
+            logger.error(f"not file found {zip_file_path}")
+            raise Http404("ZIP file does not exist")
 
-    
-    # Open the file and return it as a response
-    with open(zip_file_path, 'rb') as zip_file:
-        response = HttpResponse(zip_file.read(), content_type='application/zip')
-        response['Content-Disposition'] = f'attachment; filename={os.path.basename(zip_file_path)}'
-        return response
-
+        
+        # Open the file and return it as a response
+        with open(zip_file_path, 'rb') as zip_file:
+            response = HttpResponse(zip_file.read(), content_type='application/zip')
+            response['Content-Disposition'] = f'attachment; filename={os.path.basename(zip_file_path)}'
+            return response
+    except Exception as e:
+        logger.error(f"Download error for token:{token} error :{str(e)}")
 
 
 def items_view(request):
