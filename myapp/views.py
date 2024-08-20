@@ -19,10 +19,31 @@ from django.views.decorators.csrf import csrf_exempt
 import logging
 from django.urls import reverse
 import os
-
+from functools import wraps
 
 logger = logging.getLogger('myapp')
 
+
+def handle_server_errors(view_func):
+    @wraps(view_func)
+    def _wrapped_view(request, *args, **kwargs):
+        try:
+            return view_func(request, *args, **kwargs)
+        except Exception as e:
+            logger.error(f"An error occurred in view {view_func.__name__}: {str(e)}", exc_info=True)
+            message = 'Something went wrong please re-login to continue with the study.'
+            request.session.flush()
+            url = reverse('login') + f'?message={message}'
+            response = redirect(url)
+            for cookie in request.COOKIES:
+                preserve_cookies = ['long_term', 'long_term_group','user_id']
+                if cookie not in preserve_cookies :
+                    response.delete_cookie(cookie)
+            return response
+    return _wrapped_view
+
+
+@handle_server_errors
 def index(request):
     fish2=settings.MEDIA_URL+'fish2.png'
     fish=settings.MEDIA_URL+'fish.jpeg'
@@ -30,6 +51,7 @@ def index(request):
 
     return render(request,'mobyphish.html', {'mail':mail,'fish': fish,'fish2':fish2 } )
 
+@handle_server_errors
 def experiment(request):
     fish2=settings.MEDIA_URL+'fish2.png'
     fish=settings.MEDIA_URL+'fish.jpeg'
@@ -37,6 +59,7 @@ def experiment(request):
 
     return render(request,'mobyphish-get-started.html', {'fish': fish,'fish2':fish2 } )
 
+@handle_server_errors
 def study(request):
     fish2=settings.MEDIA_URL+'fish2.png'
     fish=settings.MEDIA_URL+'fish.jpeg'
@@ -44,6 +67,7 @@ def study(request):
 
     return render(request,'mobyphishstudy.html', {'fish': fish,'fish2':fish2 } )
 
+@handle_server_errors
 def about(request):
     fish2=settings.MEDIA_URL+'fish2.png'
     fish=settings.MEDIA_URL+'fish.jpeg'
@@ -51,6 +75,7 @@ def about(request):
 
     return render(request,'mobyphisabout.html', {'mail':mail,'fish': fish,'fish2':fish2 } )
 
+@handle_server_errors
 def extension(request):
     fish2=settings.MEDIA_URL+'fish2.png'
     fish=settings.MEDIA_URL+'fish.jpeg'
@@ -58,6 +83,7 @@ def extension(request):
 
     return render(request,'mobyphishextension.html', {'mail':mail,'fish': fish,'fish2':fish2 } )
 
+@handle_server_errors
 def long_term(request):
     fish2=settings.MEDIA_URL+'fish2.png'
     fish=settings.MEDIA_URL+'fish.jpeg'
@@ -67,6 +93,7 @@ def long_term(request):
 
 
 
+@handle_server_errors
 def login(request):
     if request.method == 'POST':
         form = UserIdForm(request.POST)
@@ -92,10 +119,11 @@ def login(request):
         form = UserIdForm()
     return render(request, 'home.html', {'form': form})
 
+@handle_server_errors
 def logout_view(request):
     response = redirect('login')
     request.session.flush()
-    preserve_cookies = ['long_term', 'long_term_group']
+    preserve_cookies = ['long_term', 'long_term_group','user_id']
 
     for cookie in request.COOKIES:
         if cookie not in preserve_cookies :
@@ -114,7 +142,8 @@ def generate_random_code(length=4):
     animal = random.choice(animals)
     color = random.choice(colors)
     number = random.randint(1, 99)
-    username=[animal,color,str(number)]
+    short_user=animal if random.random()>0.5 else color
+    username=[short_user,str(number)]
     random.shuffle(username)
     return ''.join(username)
     # characters = string.ascii_letters + string.digits
@@ -123,6 +152,7 @@ def generate_random_code(length=4):
 last_use_extension = False
 long_term_group= 1
 
+@handle_server_errors
 @csrf_exempt
 def survey(request):
     global last_use_extension
@@ -137,7 +167,7 @@ def survey(request):
             if not User.objects.filter(user_id=userID).exists():
                 break
         characters = string.ascii_lowercase + string.digits
-        bank_password=''.join(random.choice(characters) for _ in range(4))
+        bank_password=''.join(random.choice(characters) for _ in range(3))
         
         # Alternate use_extension value
         use_extension = not last_use_extension
@@ -153,7 +183,7 @@ def survey(request):
         return JsonResponse({'randomID':userID,'password':bank_password})
 
 
-
+@handle_server_errors
 @csrf_exempt
 def test_credentials(request):
     global last_use_extension
@@ -168,7 +198,7 @@ def test_credentials(request):
             if not User.objects.filter(user_id=userID).exists():
                 break
         characters = string.ascii_lowercase + string.digits
-        bank_password=''.join(random.choice(characters) for _ in range(4))
+        bank_password=''.join(random.choice(characters) for _ in range(3))
         
         # Alternate use_extension value
         use_extension = not last_use_extension
@@ -183,46 +213,46 @@ def test_credentials(request):
         logger.info(f"Created {userID} with PASSWORD: {bank_password} and use_extension: {use_extension}")
         return JsonResponse({'randomID':userID,'password':bank_password})
 
-
+@handle_server_errors
 @csrf_exempt
 def extension_download(request):
+    try:
+        if request.method== 'POST' :
+            logger.info(f"Got request from qualtrics to download extension")
+            token=""
+            while True:
+                token=generate_token()
+                if not Extension.objects.filter(token=token).exists():
+                    break
+            
+            temp=Extension(token=token)
+            temp.save()
+            return JsonResponse({'token':token})
+    except Exception as e:
+        logger.error(f"gen token error , error :{str(e)}")
 
-    if request.method== 'POST' :
-        logger.info(f"Got request from qualtrics to download extension")
-        token=""
-        while True:
-            token=generate_token()
-            if not Extension.objects.filter(token=token).exists():
-                break
-        
-        temp=Extension(token=token)
-        temp.save()
-        return JsonResponse({'token':token})
-
+@handle_server_errors
 @csrf_exempt
 def download(request,token):
-    try:
-        logger.info(f"GOT DOWNLOAD TOKEN {token}")
-        extension = get_object_or_404(Extension, token=token)
-        
-        # Define the path to the ZIP file you want to download
-        zip_file_path = os.path.join(settings.MEDIA_ROOT, 'PKI_CHROME.zip')
-        logger.error(f"Download fie path {zip_file_path}")
-        
-        if not os.path.exists(zip_file_path):
-            logger.error(f"not file found {zip_file_path}")
-            raise Http404("ZIP file does not exist")
+    logger.info(f"GOT DOWNLOAD TOKEN {token}")
+    extension = get_object_or_404(Extension, token=token)
+    
+    # Define the path to the ZIP file you want to download
+    zip_file_path = os.path.join(settings.MEDIA_ROOT, 'PKI_CHROME.zip')
+    logger.error(f"Download fie path {zip_file_path}")
+    
+    if not os.path.exists(zip_file_path):
+        logger.error(f"not file found {zip_file_path}")
+        raise Http404("ZIP file does not exist")
 
-        
-        # Open the file and return it as a response
-        with open(zip_file_path, 'rb') as zip_file:
-            response = HttpResponse(zip_file.read(), content_type='application/zip')
-            response['Content-Disposition'] = f'attachment; filename={os.path.basename(zip_file_path)}'
-            return response
-    except Exception as e:
-        logger.error(f"Download error for token:{token} error :{str(e)}")
+    
+    # Open the file and return it as a response
+    with open(zip_file_path, 'rb') as zip_file:
+        response = HttpResponse(zip_file.read(), content_type='application/zip')
+        response['Content-Disposition'] = f'attachment; filename={os.path.basename(zip_file_path)}'
+        return response
 
-
+@handle_server_errors
 def items_view(request):
     if 'user_id' not in request.COOKIES:
         return redirect('login')
@@ -281,7 +311,7 @@ def items_view(request):
             url = reverse('login') + f'?message={message}'
             response = redirect(url)
             for cookie in request.COOKIES:
-                preserve_cookies = ['long_term', 'long_term_group']
+                preserve_cookies = ['long_term', 'long_term_group','user_id']
                 if cookie not in preserve_cookies :
                     response.delete_cookie(cookie)
             return response
@@ -312,11 +342,12 @@ def items_view(request):
             long_term_group=user.long_term_group
             user.save()
             user_id = request.COOKIES['user_id']
-            response = render(request, 'items.html', {'items': '', 'completed': "YES"})
+            extension_allowed=request.COOKIES['use_extension']
+            response = render(request, 'items.html', {'items': '', 'completed': "YES",'extension_allowed':extension_allowed})
             # for cookie in request.COOKIES:
             #     response.delete_cookie(cookie)
             
-            response.set_cookie('user_id', user_id)
+            response.set_cookie('user_id', user_id,max_age=60*60*24*365*2)
             response.set_cookie('use_extension', True )
             response.set_cookie('long_term', True ,max_age=60*60*24*365*2)
             response.set_cookie('long_term_group', long_term_group,max_age=60*60*24*365*2 )
@@ -327,7 +358,7 @@ def items_view(request):
     active_item = items.filter(status='active').first()
 
     if new_generated_tasks:
-        default_items = items.filter(status='default')
+        default_items = items.filter(status='default',phish=False)
         item_count = default_items.count()
         phish_count = item_count // 5  # 20% of items
         phish_items = random.sample(list(default_items), phish_count)
@@ -348,14 +379,50 @@ def items_view(request):
                 item.phish = True
                 item.phish_type = 'cert'
                 item.save()
+        
+        total_tasks = items.count()
+        max_phish_count = total_tasks // 5
+        phished_items = list(items.filter(phish=True))
+        phished_items_count = len(phished_items)
+        
+        if phished_items_count > max_phish_count:
+            excess_phish_count = phished_items_count - max_phish_count
+            existing_url_attack_items = [item for item in phished_items if item.phish_type == 'url']
+            existing_cert_attack_items = [item for item in phished_items if item.phish_type == 'cert']
+
+            target_url_count = (2 * max_phish_count) // 3
+            target_cert_count = max_phish_count - target_url_count
+            if len(existing_url_attack_items) > target_url_count:
+                url_items_to_unphish = existing_url_attack_items[target_url_count:]
+                for item in url_items_to_unphish:
+                    item.phish = False
+                    item.phish_type = None
+                    item.save()
+                    excess_phish_count -= 1
+                    if excess_phish_count == 0:
+                        break
+
+            if excess_phish_count > 0 and len(existing_cert_attack_items) > target_cert_count:
+                cert_items_to_unphish = existing_cert_attack_items[target_cert_count:]
+                for item in cert_items_to_unphish:
+                    item.phish = False
+                    item.phish_type = None
+                    item.save()
+                    excess_phish_count -= 1
+                    if excess_phish_count == 0:
+                        break
+
+
+
 
     # Order items by status
     status_order = ['active', 'default', 'completed', 'reported', 'incorrect']
     ordered_items = sorted(items, key=lambda x: status_order.index(x.status))
+    extension_allowed=request.COOKIES['use_extension'] 
 
+    return render(request, 'items.html', {'items': ordered_items, 'active': active_item.id if active_item else None,'extension_allowed':extension_allowed})
 
-    return render(request, 'items.html', {'items': ordered_items, 'active': active_item.id if active_item else None})
-
+@handle_server_errors
 def proceed_item(request, item_id):
     if 'user_id' not in request.COOKIES:
         return redirect('login')
@@ -415,7 +482,7 @@ def proceed_item(request, item_id):
 
             return redirect('results', item_id=item.id)
 
-
+@handle_server_errors
 def results(request, item_id):
 
     item = get_object_or_404(Item, id=item_id)
@@ -429,6 +496,7 @@ def results(request, item_id):
 
     return render(request, 'results.html', {'task': task, 'task_id': item_id,'search_results':search_results, 'task_type': task_type})
 
+@handle_server_errors
 def travel_page(request, item_id):
     if request.method == 'POST':
         user_id = request.COOKIES['user_id']
@@ -531,6 +599,7 @@ def travel_page(request, item_id):
             return render(request, 'airline_result.html', context)
     return redirect('tasks')
 
+@handle_server_errors
 def booking(request):
     if request.method == 'POST':
         task_type = request.POST.get('task_type')
@@ -608,6 +677,7 @@ def booking(request):
 
     return redirect('tasks')  # Redirect to a default view if the request method is not POST
 
+@handle_server_errors
 def complete_item(request, item_id):
     user_id = request.COOKIES['user_id']
     item = get_object_or_404(Item, id=item_id)
@@ -649,7 +719,7 @@ def complete_item(request, item_id):
 
     return redirect('tasks')
 
-
+@handle_server_errors
 def report(request):
     try:
         user_id = request.COOKIES['user_id']

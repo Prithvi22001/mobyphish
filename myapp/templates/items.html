@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-    {% include 'favicon.html' %}
     <title>MobyPhish</title>
     <style>
         body {
@@ -51,22 +50,26 @@
             box-sizing: border-box; /* Ensure padding and border are included in element's total width */
             width: 100%; /* Ensure it spans the full width */
         }
+        .content-wrapper {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 20px;
+            box-sizing: border-box;
+        }
         .container {
             background-color: white;
             padding: 20px;
             border-radius: 10px;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            max-width: 750px;
             width: 100%;
-            margin: 20px auto;
+            max-width: 650px;
             text-align: center;
-            display: flex;
-            flex-direction: row;
-            box-sizing: border-box; /* Ensure padding and border are included in element's total width */
-            flex: 1; /* Allow the container to grow and fill the available space */
+            flex: 1;
         }
         .tasks {
-            flex: 1;
             text-align: center;
         }
         h2 {
@@ -156,6 +159,97 @@
             border-color: #f44336;
             color: #f44336;
         }
+
+        /* Styles for the index box
+        .index-box {
+            width: 150px;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-left: 20px; /* Space between the index and the tasks */
+        } */
+
+        .index-box h3 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #333;
+        }
+        .index-box ul {
+            padding-left: 0;
+            list-style-type: none;
+        }
+        .index-box li {
+            margin-bottom: 10px;
+        }
+        .index-box li span {
+            display: inline-block;
+            width: 90px;
+            font-weight: bold;
+        }
+        .index-box li.completed span{
+            color: black;
+            text-decoration: line-through;
+
+        }
+        .index-box li.incorrect span{
+            text-decoration: line-through;
+            text-decoration-color: red;
+            color:black;
+        }
+        .index-box li.active span {
+            color: black;
+        }
+        .index-box li.reported span {
+            color: black;
+            text-decoration: line-through;
+
+        }
+        /* Sidebar containing both boxes */
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            align-items: center; /* Center the boxes horizontally */
+            margin-left: 20px; /* Space between the sidebar and the main content */
+        }
+
+        /* Index Box */
+        .index-box {
+            width: 150px;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            margin-bottom: 20px; /* Space between the index and the extension box */
+        }
+
+        /* Extension Box */
+        .extension-box {
+            width: 150px;
+            background-color: #f8f8f8;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .extension-box h3, .index-box h3 {
+            margin-top: 0;
+            font-size: 18px;
+            color: #333;
+        }
+
+        .extension-status {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+
     </style>
     <script>
         window.onload = function() {
@@ -179,44 +273,71 @@
         </form>
     </div>
 
-    <div class="container">
-        <div class="tasks">
-            <h2>Tasks</h2>
-            <div class="messages">
-                {% for message in messages %}
-                <div class="message {{ message.tags }}">{{ message }}</div>
-                {% endfor %}
+    <div class="content-wrapper">
+        <div class="container">
+            <div class="tasks">
+                <h2>Tasks</h2>
+                <div class="messages">
+                    {% for message in messages %}
+                    <div class="message {{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+                {% if completed == 'YES' %}
+                <span>You have completed all the tasks. Please continue with part 3 of presentation.
+                </span>           
+                {% endif %}
+                <ul>
+                    {% for item in items %}
+                    <li class="item
+                    {% if item.status == 'completed' %}
+                        completed
+                    {% elif item.status == 'active' %}
+                        active
+                    {% elif item.status == 'incorrect' %}
+                        incorrect
+                    {% elif item.status == 'reported' %}
+                        reported
+                    {% endif %}">
+                        <h4>{{ item.task }}</h4>
+                        {% if item.status == 'default' or item.status == 'active' %}
+                        <form method="post" action="{% url 'proceed_item' item.id %}">
+                            {% csrf_token %}
+                            <button type="submit" data-clicked="false">Proceed and see relevant booking results</button>
+                        </form>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
             </div>
-            {% if completed == 'YES' %}
-            <span>You have completed all the tasks. Please continue with part 3 of presentation.
-            </span>           
-            {% endif %}
-            <ul>
-                {% for item in items %}
-                <li class="item
-                {% if item.status == 'completed' %}
-                    completed
-                {% elif item.status == 'active' %}
-                    active
-                {% elif item.status == 'incorrect' %}
-                    incorrect
-                {% elif item.status == 'reported' %}
-                    reported
-                {% endif %}">
-                    <h4>{{ item.task }}</h4>
-                    {% if item.status == 'default' or item.status == 'active' %}
-                    <form method="post" action="{% url 'proceed_item' item.id %}">
-                        {% csrf_token %}
-                        <button type="submit" data-clicked="false">Proceed and see relevant booking results</button>
-                    </form>
+        </div>
+        
+        <!-- Sidebar with Index and Extension Status -->
+        <div class="sidebar">
+            <!-- Index Box -->
+            <div class="index-box">
+                <h3>Index</h3>
+                <ul>
+                    <li class="completed"><span>Completed task</span></li>
+                    <li class="incorrect"><span>Incorrect task</span></li>
+                    <li class="active"><span>Active task</span></li>
+                    <li class="reported"><span>Reported task</span></li>
+                </ul>
+            </div>
+    
+            <!-- Extension Status Box -->
+            <div class="extension-box">
+                <h3>Extension Status</h3>
+                <div class="extension-status">
+                    {% if extension_allowed == 'True' %}
+                    <span style="color: green;">&#10003; Extension allowed</span>
+                    {% else %}
+                    <span style="color: red;">&#10007; No extension allowed</span>
                     {% endif %}
-                </li>
-                {% endfor %}
-            </ul>
+                </div>
+            </div>
         </div>
     </div>
-
-
+    
 
     <div class="footer">
         <p>Designed for MobyPhish Project</p>
