@@ -24,11 +24,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-f8sbjjbxk6wa9o*_ir1m=2ov-dsa7(d9$u31qtx-i_*c-6^-&a'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['.mobyphish.com','localhost','127.0.0.1']
 
-NO_OF_TASKS=15
+NO_OF_TASKS=5
 SEARCH_RESULTS=3
 CSRF_TRUSTED_ORIGINS = ['https://*.mobyphish.com','http://*.127.0.0.1']
 if not DEBUG:

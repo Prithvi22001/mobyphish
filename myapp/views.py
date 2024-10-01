@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import User, Item, ItemDump,Extension
+from .models import User, Item, ItemDump,Extension,BlockedUser
 from bank.models import BankUser,Transaction
 from .forms import UserIdForm
 import time
@@ -57,7 +57,7 @@ def experiment(request):
     fish=settings.MEDIA_URL+'fish.jpeg'
     mail=settings.MEDIA_URL+'mail1.png'
 
-    return render(request,'mobyphish-get-started.html', {'fish': fish,'fish2':fish2 } )
+    return render(request,'mobyphish-get-started.html', {'mail':mail,'fish': fish,'fish2':fish2 } )
 
 @handle_server_errors
 def study(request):
@@ -65,7 +65,7 @@ def study(request):
     fish=settings.MEDIA_URL+'fish.jpeg'
     mail=settings.MEDIA_URL+'mail1.png'
 
-    return render(request,'mobyphishstudy.html', {'fish': fish,'fish2':fish2 } )
+    return render(request,'mobyphishstudy.html', {'mail':mail,'fish': fish,'fish2':fish2 } )
 
 @handle_server_errors
 def about(request):
@@ -269,11 +269,26 @@ def items_view(request):
     
     total_correct_tasks=complete_tasks_count+active_tasks_count+incorrect_tasks_count
     logger.info(f"{user_id} Entering items_view function")
+    test_user=['g1short','g2short','g3short','g1long','g2long','g3long','url_short','url_long','cert_short','cert_long']
+    test_user_obj = User.objects.filter(user_id__in=test_user)
 
-
+    # for obj in test_user_obj:
+    # print(f"{obj.__dict__}",flush=True)
 
     # Generate tasks only if the number of default tasks is less than NO_OF_TASKS
     if default_tasks_count+complete_tasks_count+active_tasks_count< settings.NO_OF_TASKS:
+
+        #User logged in for long term when they are not supposed to
+        if user.round_no >2 and BlockedUser.objects.filter(user_id=user_id).exists():
+            message = 'You have completed this week\'s tasks. A reminder for the next round will be sent from the no-reply-mobyphish email.'
+            request.session.flush()
+            url = reverse('login') + f'?message={message}'
+            response = redirect(url)
+            for cookie in request.COOKIES:
+                preserve_cookies = ['long_term', 'long_term_group','user_id']
+                if cookie not in preserve_cookies :
+                    response.delete_cookie(cookie)
+            return response
 
         for _ in range(settings.NO_OF_TASKS):
             default_tasks_count = Item.objects.filter(user=user, status='default').count()
@@ -285,88 +300,176 @@ def items_view(request):
                 
     if default_tasks_count+active_tasks_count==0:
         if user.round_no == 1:
-            user.round_no = 2
-            user.use_extension= not user.use_extension
-            user.save()
-            logger.info(f"USER: {user_id} completed round 1")
-            items = Item.objects.filter(user=user)
-            for item in items:
-                ItemDump.objects.create(
-                    user=item.user,
-                    task=item.task,
-                    results=item.results,
-                    all_info=item.all_info,
-                    message=item.message,
-                    time_start=item.time_start,
-                    time_end=item.time_end,
-                    bank_vist=item.bank_vist,
-                    status=item.status,
-                    phish=item.phish,
-                    result=item.result
-                )
-            items.delete()
-            message = 'Round completed. Proceed to the next round.'
-            request.session.flush()
-
-            url = reverse('login') + f'?message={message}'
-            response = redirect(url)
-            for cookie in request.COOKIES:
-                preserve_cookies = ['long_term', 'long_term_group','user_id']
-                if cookie not in preserve_cookies :
-                    response.delete_cookie(cookie)
-            return response
+            if user_id in test_user:
+                items = Item.objects.filter(user=user)
+                items.delete()
+                logger.info(f"TEST USER {user_id} completed short term study")
+            else:
+                items = Item.objects.filter(user=user)
+                for item in items:
+                    ItemDump.objects.create(
+                        user=item.user,
+                        task=item.task,
+                        results=item.results,
+                        all_info=item.all_info,
+                        message=item.message,
+                        time_start=item.time_start,
+                        time_end=item.time_end,
+                        bank_vist=item.bank_vist,
+                        status=item.status,
+                        phish=item.phish,
+                        result=item.result,
+                        round_no=user.round_no,
+                    )
+                items.delete()
+                user.round_no = 2
+                user.use_extension= not user.use_extension
+                user.save()
+                logger.info(f"USER: {user_id} completed round 1")
+                
+                message = 'Round completed. Proceed to the next round.'
+                request.session.flush()
+                url = reverse('login') + f'?message={message}'
+                response = redirect(url)
+                for cookie in request.COOKIES:
+                    preserve_cookies = ['long_term', 'long_term_group','user_id']
+                    if cookie not in preserve_cookies :
+                        response.delete_cookie(cookie)
+                return response
 
         elif default_tasks_count+active_tasks_count==0 and user.round_no == 2:
             logger.info(f"USER: {user_id} both round completed")
-            items = Item.objects.filter(user=user)
-            for item in items:
-                ItemDump.objects.create(
-                    user=item.user,
-                    task=item.task,
-                    results=item.results,
-                    all_info=item.all_info,
-                    message=item.message,
-                    time_start=item.time_start,
-                    time_end=item.time_end,
-                    bank_vist=item.bank_vist,
-                    status=item.status,
-                    phish=item.phish,
-                    result=item.result
-                )
-            items.delete()
+            if user_id in test_user:
+                items = Item.objects.filter(user=user)
+                items.delete()
+                logger.info(f"TEST USER {user_id} completed short term study")
+            else:
+                items = Item.objects.filter(user=user)
+                for item in items:
+                    ItemDump.objects.create(
+                        user=item.user,
+                        task=item.task,
+                        results=item.results,
+                        all_info=item.all_info,
+                        message=item.message,
+                        time_start=item.time_start,
+                        time_end=item.time_end,
+                        bank_vist=item.bank_vist,
+                        status=item.status,
+                        phish=item.phish,
+                        result=item.result,
+                        round_no=user.round_no,
+                    )
+                items.delete()
 
-            # response = redirect('tasks')
-            user.round_no += 1 
-            user.use_extension=True
-            user.long_term=True
-            long_term_group=user.long_term_group
-            user.save()
-            user_id = request.COOKIES['user_id']
-            extension_allowed=request.COOKIES['use_extension']
-            response = render(request, 'items.html', {'items': '', 'completed': "YES",'extension_allowed':extension_allowed})
-            # for cookie in request.COOKIES:
-            #     response.delete_cookie(cookie)
-            
-            response.set_cookie('user_id', user_id,max_age=60*60*24*365*2)
-            response.set_cookie('use_extension', True )
-            response.set_cookie('long_term', True ,max_age=60*60*24*365*2)
-            response.set_cookie('long_term_group', long_term_group,max_age=60*60*24*365*2 )
-            # return render(request, 'items.html', {'items': '','completed':"YES"})
-            return response
+                # response = redirect('tasks')
+                user.round_no += 1 
+                user.use_extension=True
+                user.long_term=True
+                long_term_group=user.long_term_group
+                user.save()
+                user_id = request.COOKIES['user_id']
+                extension_allowed=request.COOKIES['use_extension']
+
+                #Block users for week in long term study
+                if not BlockedUser.objects.filter(user_id=user_id).exists():  # Check if user is already blocked
+                    BlockedUser.objects.create(user_id=user_id)
+                    logger.info(f"USER {user_id} added to BlockedUser table")
+
+                response = render(request, 'items.html', {'items': '', 'completed': "YES",'extension_allowed':extension_allowed})
+                # for cookie in request.COOKIES:
+                #     response.delete_cookie(cookie)
+                
+                response.set_cookie('user_id', user_id,max_age=60*60*24*365*2)
+                response.set_cookie('use_extension', True )
+                response.set_cookie('long_term', True ,max_age=60*60*24*365*2)
+                response.set_cookie('long_term_group', long_term_group,max_age=60*60*24*365*2 )
+                # return render(request, 'items.html', {'items': '','completed':"YES"})
+                return response
+        
+        elif default_tasks_count+active_tasks_count==0 and user.round_no > 2:
+            logger.info(f"USER: {user_id} round completed")
+            if user_id in test_user:
+                items = Item.objects.filter(user=user)
+                items.delete()
+                logger.info(f"TEST USER {user_id} completed short term study")
+            else:
+                items = Item.objects.filter(user=user)
+                for item in items:
+                    ItemDump.objects.create(
+                        user=item.user,
+                        task=item.task,
+                        results=item.results,
+                        all_info=item.all_info,
+                        message=item.message,
+                        time_start=item.time_start,
+                        time_end=item.time_end,
+                        bank_vist=item.bank_vist,
+                        status=item.status,
+                        phish=item.phish,
+                        result=item.result,
+                        round_no=user.round_no,
+                    )
+                items.delete()
+
+                # response = redirect('tasks')
+                user.round_no += 1 
+                user.use_extension=True
+                user.long_term=True
+                long_term_group=user.long_term_group
+                user.save()
+                user_id = request.COOKIES['user_id']
+                extension_allowed=request.COOKIES['use_extension']
+                
+                #Block users for week in long term study
+                if not BlockedUser.objects.filter(user_id=user_id).exists():  # Check if user is already blocked
+                    BlockedUser.objects.create(user_id=user_id)
+                    logger.info(f"USER {user_id} added to BlockedUser table")
+
+
+                message = 'Thank you for participating in this week\'s experiment.Look out for an email from Mobyphish to start the next round.'
+                request.session.flush()
+                url = reverse('login') + f'?message={message}'
+                response = redirect(url)
+                for cookie in request.COOKIES:
+                    preserve_cookies = ['long_term', 'long_term_group','user_id']
+                    if cookie not in preserve_cookies :
+                        response.delete_cookie(cookie)
+                return response            
+                
 
     items = Item.objects.filter(user=user)
     active_item = items.filter(status='active').first()
 
-    if new_generated_tasks:
+    if new_generated_tasks and items.count()==settings.NO_OF_TASKS:
         default_items = items.filter(status='default',phish=False)
         item_count = default_items.count()
-        phish_count = item_count // 5  # 20% of items
-        phish_items = random.sample(list(default_items), phish_count)
-        
-        url_attack_count = (2 * phish_count) // 3
-        cert_attack_count = phish_count - url_attack_count
-        url_attack_items = random.sample(phish_items, url_attack_count)
-        cert_attack_items = [item for item in phish_items if item not in url_attack_items]
+        if 'cert' in user_id or 'url' in user_id:
+            phish_count = 5
+        else:
+            phish_count = 3
+        # phish_count = 3 if 'cert' not in user_id and 'url' not in user_id else 5 #item_count // 5  # 20% of items
+        phish_items = random.sample(list(default_items), phish_count) if 'cert' not in user_id and 'url' not in user_id else default_items
+        logger.info(f"User {user_id} phishing {len(phish_items)}")
+        if 'cert' in user_id:
+            url_attack_count = 0  #(2 * phish_count) // 3 
+            cert_attack_count = settings.NO_OF_TASKS #phish_count - url_attack_count
+        elif 'url' in user_id:
+            url_attack_count = settings.NO_OF_TASKS  #(2 * phish_count) // 3 
+            cert_attack_count = 0 #phish_count - url_attack_count
+        else:
+            url_attack_count = 2  #(2 * phish_count) // 3 
+            cert_attack_count = 1 #phish_count - url_attack_count
+
+        if 'url' in user_id:
+            url_attack_items = default_items
+            cert_attack_items = [] #[item for item in phish_items if item not in url_attack_items]
+        elif 'cert' in user_id:
+            url_attack_items = []
+            cert_attack_items =  default_items #[item for item in phish_items if item not in url_attack_items]
+        else:
+            url_attack_items = random.sample(phish_items, url_attack_count) 
+            cert_attack_items = [item for item in phish_items if item not in url_attack_items]
 
         for item in url_attack_items:
             if not item.phish:
@@ -380,40 +483,37 @@ def items_view(request):
                 item.phish_type = 'cert'
                 item.save()
         
-        total_tasks = items.count()
-        max_phish_count = total_tasks // 5
-        phished_items = list(items.filter(phish=True))
-        phished_items_count = len(phished_items)
+        # total_tasks = items.count()
+        # max_phish_count = total_tasks // 5
+        # phished_items = list(items.filter(status='default',phish=True))
+        # phished_items_count = len(phished_items)
         
-        if phished_items_count > max_phish_count:
-            excess_phish_count = phished_items_count - max_phish_count
-            existing_url_attack_items = [item for item in phished_items if item.phish_type == 'url']
-            existing_cert_attack_items = [item for item in phished_items if item.phish_type == 'cert']
+        # if phished_items_count > max_phish_count:
+        #     excess_phish_count = phished_items_count - max_phish_count
+        #     existing_url_attack_items = [item for item in phished_items if item.phish_type == 'url' and item.status == 'default' ]
+        #     existing_cert_attack_items = [item for item in phished_items if item.phish_type == 'cert'and item.status == 'default']
 
-            target_url_count = (2 * max_phish_count) // 3
-            target_cert_count = max_phish_count - target_url_count
-            if len(existing_url_attack_items) > target_url_count:
-                url_items_to_unphish = existing_url_attack_items[target_url_count:]
-                for item in url_items_to_unphish:
-                    item.phish = False
-                    item.phish_type = None
-                    item.save()
-                    excess_phish_count -= 1
-                    if excess_phish_count == 0:
-                        break
+        #     target_url_count = (2 * max_phish_count) // 3
+        #     target_cert_count = max_phish_count - target_url_count
+        #     if len(existing_url_attack_items) > target_url_count:
+        #         url_items_to_unphish = existing_url_attack_items[target_url_count:]
+        #         for item in url_items_to_unphish:
+        #             item.phish = False
+        #             item.phish_type = None
+        #             item.save()
+        #             excess_phish_count -= 1
+        #             if excess_phish_count == 0:
+        #                 break
 
-            if excess_phish_count > 0 and len(existing_cert_attack_items) > target_cert_count:
-                cert_items_to_unphish = existing_cert_attack_items[target_cert_count:]
-                for item in cert_items_to_unphish:
-                    item.phish = False
-                    item.phish_type = None
-                    item.save()
-                    excess_phish_count -= 1
-                    if excess_phish_count == 0:
-                        break
-
-
-
+        #     if excess_phish_count > 0 and len(existing_cert_attack_items) > target_cert_count:
+        #         cert_items_to_unphish = existing_cert_attack_items[target_cert_count:]
+        #         for item in cert_items_to_unphish:
+        #             item.phish = False
+        #             item.phish_type = None
+        #             item.save()
+        #             excess_phish_count -= 1
+        #             if excess_phish_count == 0:
+        #                 break
 
     # Order items by status
     status_order = ['active', 'default', 'completed', 'reported', 'incorrect']
@@ -653,7 +753,7 @@ def booking(request):
 
         if phish:
             bad_urls=['acct-ilogicalLoansSavings','acct.ilogical.LoansSavings','acct.iIogicalLoansSavings','acct.llogicalLoansSavings','acct.ilogicalLoanSavings','acct.ilogicaILoansSavings','acct.lIogicalLoansSavings']
-            bad_prefix=['wcwm','wzho']
+            bad_prefix=['wcwm','wzho','wzel','wmel','wkeb']
             url=''
             if phish_type=='cert':
                 logger.info(f"USER: {user_id}, ITEM: {item_id} ,phish_type:{phish_type} so ,cert attack")

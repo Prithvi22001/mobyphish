@@ -38,17 +38,19 @@ class Item(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    task = models.CharField(max_length=100)
+    task = models.CharField(max_length=1000)
     results=models.BinaryField()
     all_info=models.BinaryField()
-    message=models.CharField(max_length=100)
+    message=models.CharField(max_length=1000)
     time_start = models.IntegerField(null=True, blank=True)
     time_end = models.IntegerField(null=True, blank=True)
     bank_vist=models.IntegerField(null=True, blank=True)
-    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='default')
+    status = models.CharField(max_length=100, choices=STATUS_CHOICES, default='default')
     phish = models.BooleanField(default=False)
-    phish_type = models.CharField(null=True,default='url',max_length=10)
-    result= models.CharField(max_length=10, choices=RESULT_CHOICES, default='sucess')
+    phish_type = models.CharField(null=True,default='',max_length=10)
+    result= models.CharField(max_length=100, choices=RESULT_CHOICES, default='')
+    round_no=models.IntegerField(null=True, blank=True)
+
 
     def __str__(self):
         return self.task
@@ -80,6 +82,15 @@ class ItemDump(models.Model):
     phish = models.BooleanField(default=False)
     phish_type = models.CharField(null=True,default='url',max_length=10)
     result= models.CharField(max_length=10, choices=RESULT_CHOICES, default='sucess')
+    round_no=models.IntegerField(null=True, blank=True)
 
     def __str__(self):
         return self.task
+
+
+class BlockedUser(models.Model):
+
+    user_id = models.CharField(max_length=255, unique=True)  # Ensure uniqueness
+    def __str__(self):
+        return self.user_id
+    

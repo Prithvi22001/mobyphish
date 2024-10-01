@@ -20,6 +20,27 @@
 <div class="w3-top">
   <div class="w3-bar w3-blue w3-card w3-left-align w3-large">
     <a href="#" class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large w3-blue" href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
+    <a href="{% url 'index' %}" class="w3-bar-item w3-button w3-padding-large {% if request.path == '/' %}w3-white{% endif %}">Home</a>
+    <a href="{% url 'about' %}" class="w3-bar-item w3-button w3-hide-small w3-padding-large {% if request.path == '/about' %}w3-white{% endif %}">About Us</a>
+    <a href="{% url 'study' %}" class="w3-bar-item w3-button w3-hide-small w3-padding-large {% if request.path == '/study' %}w3-white{% endif %}">The Study</a>
+    <a href="{% url 'experiment' %}" class="w3-bar-item w3-button w3-hide-small w3-padding-large {% if request.path == '/experiment' %}w3-white{% endif %}">Get Started!</a>
+    <a href="{% url 'long_term' %}" class="w3-bar-item w3-button w3-hide-small w3-padding-large {% if request.path == '/long_term' %}w3-white{% endif %}">Long Term Study</a>
+    <a href="{% url 'extension' %}" class="w3-bar-item w3-button w3-hide-small w3-padding-large {% if request.path == '/extension' %}w3-white{% endif %}">Our Extension</a>
+    <!-- <a href="#contact" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-white">Contact</a> -->
+    <a id="contact-link" href="#contact" class="w3-bar-item w3-button w3-hide-small w3-padding-large">Contact</a>
+
+    <script>
+      window.addEventListener('hashchange', function() {
+        if (window.location.hash === '#contact') {
+          document.getElementById('contact-link').classList.add('w3-white');
+        } else {
+          document.getElementById('contact-link').classList.remove('w3-white');
+        }
+      });
+    </script>
+  </div>
+  <!-- <div class="w3-bar w3-blue w3-card w3-left-align w3-large">
+    <a href="#" class="w3-bar-item w3-button w3-hide-medium w3-hide-large w3-right w3-padding-large w3-hover-white w3-large w3-blue" href="javascript:void(0);" onclick="myFunction()" title="Toggle Navigation Menu"><i class="fa fa-bars"></i></a>
     <a href="{% url 'index' %}" class="w3-bar-item w3-button w3-padding-large w3-white">Home</a>
     <a href="{% url 'about' %}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">About Us</a>
     <a href="{% url 'study' %}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">The Study</a>
@@ -27,13 +48,13 @@
     <a href="{% url 'long_term' %}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Long Term Study</a>
     <a href="{% url 'extension' %}" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Our Extension</a>
     <a href="#contact" class="w3-bar-item w3-button w3-hide-small w3-padding-large w3-hover-white">Contact</a>
-  </div>
+  </div> -->
 </div>
 
 <header class="w3-container w3-blue w3-center" style="padding: 50px 16px;">
   <img src="../../static/mobyphishLogo.webp" alt="MobyPhish logo" width="15%">
   <h1 class="w3-margin w3-jumbo">MobyPhish</h1>
-  <p class="w3-xlarge">Enabling End-Users to Make Trust Decisions in the Context of HTTPS</p>
+  <p class="w3-xlarge">Empowering End-Users Against PKI Vulnerabilities</p>
 </header>
 
 {% block content %}
