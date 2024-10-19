@@ -34,6 +34,7 @@ urlpatterns = [
     path('proceed_item/<int:item_id>/', views.proceed_item, name='proceed_item'),
     path('complete_item/<int:item_id>/', views.complete_item, name='complete_item'),
     path('survey',views.survey,name='survey'),
+    path('user_data',views.user_data,name='user_data'),
     path('test_credentials',views.test_credentials,name='test_credentials'),
     path('report',views.report,name='report'),
     path('about',views.about,name='about'),
@@ -42,7 +43,10 @@ urlpatterns = [
     path('experiment',views.experiment,name='experiment'),
     path('long_term',views.long_term,name='long_term'),
     path('download/<str:token>/',views.download,name='download'),
+    path('download_page',views.download_page,name='download_page'),
+    path('download_extension',views.download_extension,name='download_extension'),
+    path('download_file/<str:token>/',views.download_file,name='download_file'),
     path('extension_download',views.extension_download,name='extension_download'),
+    path('test_error_view',views.test_error_view,name='test_error_view'),
     
-
 ]

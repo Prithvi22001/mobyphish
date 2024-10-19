@@ -147,6 +147,12 @@
             text-decoration: line-through;
             background-color: #ffcccc;
         }
+        .test {
+            background-color: #e0e0e0;
+            color: #333;
+            border-left: 5px solid #9e9e9e;
+            font-style: italic;
+        }
         .messages {
             margin-bottom: 20px;
         }
@@ -284,7 +290,7 @@
                     {% endfor %}
                 </div>
                 {% if completed == 'YES' %}
-                <span>You have completed all the tasks. Please continue with part 3 of presentation.
+                <span>You have completed all the tasks for short-term study. Please continue with part 3 of presentation.
                 </span>           
                 {% endif %}
                 <ul>
@@ -296,11 +302,18 @@
                         active
                     {% elif item.status == 'incorrect' %}
                         incorrect
+                    {% elif item.status == 'test' %}
+                        test
                     {% elif item.status == 'reported' %}
                         reported
                     {% endif %}">
-                        <h4>{{ item.task }}</h4>
-                        {% if item.status == 'default' or item.status == 'active' %}
+                        <h4>
+                            {% if item.status == 'test' %}
+                            This is a test task: 
+                            {% endif %}
+                            {{ item.task }}
+                        </h4>
+                        {% if item.status == 'default' or item.status == 'active' or item.status == 'test'  %}
                         <form method="post" action="{% url 'proceed_item' item.id %}">
                             {% csrf_token %}
                             <button type="submit" data-clicked="false">Proceed and see relevant booking results</button>

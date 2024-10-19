@@ -13,8 +13,14 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os
 import datetime
+import environ
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
+ERROR_LIST = env.list('ERROR_LIST', default=[])
+SENDER_EMAIL = env.list('SENDER_EMAIL', default="")
+PASSWORD=env.list('PASSWORD', default="")
 
 
 # Quick-start development settings - unsuitable for production

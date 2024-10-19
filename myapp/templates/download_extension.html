@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+    <script>
+        // Automatically trigger the download after a short delay
+        window.onload = function() {
+            setTimeout(function() {
+                window.location.href = "{{ download_url }}";  // URL to download the ZIP file
+            }, 1000);  // 1-second delay before download
+        };
+    </script>
+    
+    <div class="w3-row-padding w3-container" style="min-height: 100vh; display: flex; justify-content: center; align-items: center;">
+        <div class="w3-content" style="width: 75%; max-height: 85vh; overflow-y: auto; padding-bottom: 2rem;">
+      
+            <!-- Section for Terms of Service and Extension Download -->
+            <h4>Thank you for downloading the MobyPhish Extension</h4>
+            <p>You can view the document on installing the extension <a href="https://1drv.ms/w/c/608044cfc8a3be81/EVXz9X_jwPhGjXkfzYPYPGkBFdF8Tb1k-eU5G6FhfWCKRw" target="_blank">here</a>.</p>
+
+            <!-- Embedded Qualtrics form for terms of service -->
+            <!-- <iframe id="qualtrics-iframe" src="https://1drv.ms/w/c/608044cfc8a3be81/IQRV8_V_48D4Ro15H82D2DxpAawU1GLeDpA6aXRA-IdSVWc?em=2" 
+            style="display: flex; margin: 0 auto; width: 100%; height:400px; max-width: 100%;">
+            This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by 
+            <a target="_blank" href="https://office.com/webapps">Office</a>.
+            </iframe> -->
+        </div>
+      </div>
+
+      
+</body>
+</html>

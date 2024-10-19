@@ -1,8 +1,17 @@
 from django.db import models
 import time
+from django_cryptography.fields import encrypt
 
 def get_current_unix_timestamp():
     return int(time.time())
+
+class UserData(models.Model):
+    user_id=models.CharField(max_length=100, unique=True)
+    password=models.CharField(max_length=100)
+    name = encrypt(models.CharField(max_length=255)) 
+    email = encrypt(models.CharField(max_length=255)) 
+    def __str__(self):
+        return self.user_id
 
 class User(models.Model):
     user_id = models.CharField(max_length=100, unique=True)
@@ -24,6 +33,7 @@ class Extension(models.Model):
 
 class Item(models.Model):
     STATUS_CHOICES = [
+        ('test', 'Test'),        
         ('default', 'Default'),
         ('active', 'Active'),
         ('incorrect', 'Incorrect'),

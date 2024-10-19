@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from .models import User, Item, ItemDump,Extension,BlockedUser
+from .models import User, Item, ItemDump,Extension,BlockedUser,UserData
 from bank.models import BankUser,Transaction
 from .forms import UserIdForm
 import time
@@ -20,6 +20,7 @@ import logging
 from django.urls import reverse
 import os
 from functools import wraps
+from mail import send_email
 
 logger = logging.getLogger('myapp')
 
@@ -30,7 +31,12 @@ def handle_server_errors(view_func):
         try:
             return view_func(request, *args, **kwargs)
         except Exception as e:
+            error_list=settings.ERROR_LIST
+            # error_list=error_list.split(",") if error_list else []
             logger.error(f"An error occurred in view {view_func.__name__}: {str(e)}", exc_info=True)
+            logger.error(f"This is the receipent list {error_list}")
+            output=send_email('ERROR BACKEND',f"An error occurred in view {view_func.__name__}: {str(e)}"+f"\nThis is test mail.",error_list)
+            logger.error(f"Error Mail sending output {output} ")
             message = 'Something went wrong please re-login to continue with the study.'
             request.session.flush()
             url = reverse('login') + f'?message={message}'
@@ -43,12 +49,17 @@ def handle_server_errors(view_func):
     return _wrapped_view
 
 
+
+@handle_server_errors
+def test_error_view(request):
+    raise ValueError("This is a test error for debugging purposes.")
+
 @handle_server_errors
 def index(request):
     fish2=settings.MEDIA_URL+'fish2.png'
     fish=settings.MEDIA_URL+'fish.jpeg'
     mail=settings.MEDIA_URL+'mail1.png'
-
+    # raise Exception("Test")
     return render(request,'mobyphish.html', {'mail':mail,'fish': fish,'fish2':fish2 } )
 
 @handle_server_errors
@@ -185,6 +196,23 @@ def survey(request):
 
 @handle_server_errors
 @csrf_exempt
+def user_data(request):
+
+    if request.method== 'POST' :
+        data= json.loads(request.body)
+        logger.info(f"Got user data from qualtrics securely storing it")
+        name=data.get('Name')
+        email=data.get('Email')
+        user_id=data.get('UserID')
+        password=data.get('Password')
+        UserData.objects.create(user_id=user_id,password=user_id,name=name, email=email)
+        logger.warning(f"{data}")
+        return JsonResponse({'status':'success'})
+
+
+
+@handle_server_errors
+@csrf_exempt
 def test_credentials(request):
     global last_use_extension
     global long_term_group 
@@ -236,8 +264,22 @@ def extension_download(request):
 def download(request,token):
     logger.info(f"GOT DOWNLOAD TOKEN {token}")
     extension = get_object_or_404(Extension, token=token)
+    download_extension = reverse('download_extension') 
+    return redirect(f'{download_extension}?token={token}')
+
+
+@handle_server_errors
+def download_extension(request):
+    token = request.GET.get('token')
+    context = {
+        'download_url': f'/download_file/{token}/',  # Adjust based on your URL structure
+    }
     
+    return render(request, 'download_extension.html', context)
+
+def download_file(request,token):
     # Define the path to the ZIP file you want to download
+    logger.info(f"GOT DOWNLOAD TOKEN {token}")
     zip_file_path = os.path.join(settings.MEDIA_ROOT, 'PKI_CHROME.zip')
     logger.error(f"Download fie path {zip_file_path}")
     
@@ -250,7 +292,14 @@ def download(request,token):
     with open(zip_file_path, 'rb') as zip_file:
         response = HttpResponse(zip_file.read(), content_type='application/zip')
         response['Content-Disposition'] = f'attachment; filename={os.path.basename(zip_file_path)}'
-        return response
+    return response
+
+@handle_server_errors
+def download_page(request):
+    fish2=settings.MEDIA_URL+'fish2.png'
+    fish=settings.MEDIA_URL+'fish.jpeg'
+    mail=settings.MEDIA_URL+'mail1.png'
+    return render(request, 'mobyinstall.html', {'mail':mail,'fish': fish,'fish2':fish2 }) 
 
 @handle_server_errors
 def items_view(request):
@@ -483,6 +532,11 @@ def items_view(request):
                 item.phish_type = 'cert'
                 item.save()
         
+        #Test task
+        ans=task_generate.generate_task()
+        task=Item(user=user,task=ans['task'],results=pickle.dumps(ans['results']),all_info=pickle.dumps(ans),status='test')
+        task.save()
+        
         # total_tasks = items.count()
         # max_phish_count = total_tasks // 5
         # phished_items = list(items.filter(status='default',phish=True))
@@ -516,7 +570,7 @@ def items_view(request):
         #                 break
 
     # Order items by status
-    status_order = ['active', 'default', 'completed', 'reported', 'incorrect']
+    status_order = ['test','active', 'default', 'completed', 'reported', 'incorrect']
     ordered_items = sorted(items, key=lambda x: status_order.index(x.status))
     extension_allowed=request.COOKIES['use_extension'] 
 

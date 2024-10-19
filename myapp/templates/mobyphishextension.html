@@ -1,17 +1,63 @@
 {% include 'base.html' %}
 {% block content %}
 
-<div class="w3-row-padding w3-container" style="height: 100vh; display: flex; justify-content: center; align-items: center;">
-  <div class="w3-content" style="width: 75%;">
-    <!-- <div class="w3-twothird w3-center"> -->
-      <h1>Get Started: MobyPhish Extension</h1>
-      <p class="w3-text-grey">To download the extension please go through and agree to the terms of service.</p>
-      <iframe src="https://trinity.az1.qualtrics.com/jfe/form/SV_3W4ReSmlrPskltc" 
-      style="display: block; margin: 0 auto; width: 60%; height:400px ;">This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by <a target="_blank" href="https://office.com/webapps">Office</a>.
-      </iframe>
-    <!-- </div> -->
+<div class="w3-row-padding w3-container" style="min-height: 100vh; display: flex; justify-content: center; align-items: center;">
+  <div class="w3-content" style="width: 75%; max-height: 85vh; overflow-y: auto; padding-bottom: 2rem;">
+
+      <!-- Password Input Section -->
+      <div id="pass">
+      <h1>Enter Password</h1>
+      <p class="w3-text-grey">Please enter the password to proceed.</p>
+      <input type="password" id="passwordInput" placeholder="Enter password" class="w3-input w3-border" style="width: 50%; margin-bottom: 20px;">
+      <button onclick="validatePassword()" class="w3-button w3-blue">Submit</button>
+      </div>
+      <!-- Main Content Section (Hidden by default) -->
+      <div id="mainContent" style="display: none;">
+          <!-- Section for Terms of Service and Extension Download -->
+          <h1>Get Started: MobyPhish Extension</h1>
+          <p class="w3-text-grey">Please go through and agree to the terms of service before downloading the extension. 
+              <a href="#" style="color: blue;" onclick="openNewTab()">To view steps for installing and deleting the extension click here.</a>
+          </p>
+
+          <!-- Embedded Qualtrics form for terms of service -->
+          <iframe id="qualtrics-iframe" src="https://trinity.az1.qualtrics.com/jfe/form/SV_3W4ReSmlrPskltc" 
+          style="display: block; margin: 0 auto; width: 60%; height:400px; max-width: 100%;">
+          This is an embedded <a target="_blank" href="https://office.com">Microsoft Office</a> presentation, powered by 
+          <a target="_blank" href="https://office.com/webapps">Office</a>.
+          </iframe>
+
   </div>
 </div>
+</div>
+
+
+<div id ="doc" style="display: none; text-align: center; margin-top: 20px;">
+  <p>You can also view the document on installing the extension 
+    <a href="https://1drv.ms/w/c/608044cfc8a3be81/EVXz9X_jwPhGjXkfzYPYPGkBFdF8Tb1k-eU5G6FhfWCKRw" target="_blank">here</a>.
+  </p>
+</div>
+
+
+<script>
+  // Password validation
+  function validatePassword() {
+      var inputPassword = document.getElementById('passwordInput').value;
+      var correctPassword = 'mobyphish';  // Define the correct password
+
+      if (inputPassword === correctPassword) {
+          document.getElementById('mainContent').style.display = 'block';
+          document.getElementById('doc').style.display = 'block';
+          document.getElementById('pass').style.display= 'none'; // Show the main content
+      } else {
+          alert('Incorrect password. Please try again.');
+      }
+  }
+
+  // Open new tab for extension download
+  function openNewTab() {
+      window.open("{% url 'download_page' %}", '_blank');
+  }
+</script>
 
 {% endblock %}
 {% include 'contact.html' %}
